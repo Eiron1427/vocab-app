@@ -2,12 +2,14 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Mail, LockKeyhole, Eye, EyeOff } from "lucide-react";
+import { LockKeyhole, Eye, EyeOff } from "lucide-react";
 
-export default function LoginForm() {
-    const [email, setEmail] = useState("");
+export default function ForgotPasswordForm() {
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
@@ -23,9 +25,17 @@ export default function LoginForm() {
             return;
         }
 
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
+
+        // Demo only: no saved password is changed.
         setSuccess(true);
         setPassword("");
+        setConfirmPassword("");
         setShowPassword(false);
+        setShowConfirmPassword(false);
     }
 
     const fieldStyle =
@@ -53,47 +63,25 @@ export default function LoginForm() {
                 setSuccess(false);
             }}
         >
-            <div className="grid gap-6">
-                <div className={fieldStyle}>
-                    <Mail
-                        aria-hidden="true"
-                        className="size-7 shrink-0 text-[#292929]"
-                    />
-
-                    <label htmlFor="login-email" className="sr-only">
-                        Dito ang Email address
-                    </label>
-
-                    <input
-                        id="login-email"
-                        name="email"
-                        type="email"
-                        placeholder="Email address mo dito"
-                        autoComplete="email"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                        required
-                        className={inputStyle}
-                    />
-                </div>
-
+            <div className="grid gap-8">
+                {/* New password */}
                 <div className={fieldStyle}>
                     <LockKeyhole
                         aria-hidden="true"
                         className="size-7 shrink-0 text-[#292929]"
                     />
 
-                    <label htmlFor="login-password" className="sr-only">
-                        Ilagay mo dito Password
+                    <label htmlFor="new-password" className="sr-only">
+                        Lagay mo dito bagong password
                     </label>
 
                     <input
-                        id="login-password"
+                        id="new-password"
                         name="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Password mo dito"
-                        autoComplete="current-password"
-                        aria-describedby="login-password-hint"
+                        placeholder="Bagong Password Mo"
+                        autoComplete="new-password"
+                        aria-describedby="reset-password-hint"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         minLength={8}
@@ -104,10 +92,8 @@ export default function LoginForm() {
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        aria-label={
-                            showPassword ? "Hide password" : "Show password"
-                        }
-                        aria-controls="login-password"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-controls="new-password"
                         className={eyeButtonStyle}
                     >
                         {showPassword ? (
@@ -117,16 +103,54 @@ export default function LoginForm() {
                         )}
                     </button>
                 </div>
+
+                {/* Confirm password */}
+                <div className={fieldStyle}>
+                    <LockKeyhole
+                        aria-hidden="true"
+                        className="size-7 shrink-0 text-[#292929]"
+                    />
+
+                    <label htmlFor="confirm-new-password" className="sr-only">
+                        Confirm mo password
+                    </label>
+
+                    <input
+                        id="confirm-new-password"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirm mo Password"
+                        autoComplete="new-password"
+                        value={confirmPassword}
+                        onChange={(event) => setConfirmPassword(event.target.value)}
+                        minLength={8}
+                        required
+                        className={inputStyle}
+                    />
+
+                    <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        aria-label={
+                            showConfirmPassword
+                                ? "Hide confirmation password"
+                                : "Show confirmation password"
+                        }
+                        aria-controls="confirm-new-password"
+                        className={eyeButtonStyle}
+                    >
+                        {showConfirmPassword ? (
+                            <EyeOff aria-hidden="true" className="size-7" />
+                        ) : (
+                            <Eye aria-hidden="true" className="size-7" />
+                        )}
+                    </button>
+                </div>
             </div>
 
-            <div className="mt-4 text-right">
-                <Link
-                    href="/forgot"
-                    className="rounded-sm text-sm text-[#173caf] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98]"
-                >
-                    Forgot password?
-                </Link>
-            </div>
+            <p id="reset-password-hint" className="mt-3 text-sm">
+                Dapat 8 characters ang Password mo
+            </p>
 
             {error && (
                 <p
@@ -142,15 +166,15 @@ export default function LoginForm() {
                     role="status"
                     className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800"
                 >
-                    Okay na, naka log in kana, pero di na save(wala pa di pa pwede)
+                    Okay na, nakapag palit kana ng password, pero di na save(wala pa di pa pwede)
                 </p>
             )}
 
             <button
                 type="submit"
-                className="mt-8 min-h-15.5 w-full cursor-pointer rounded-[18px] border border-[#514b3e] bg-[#ffe183] p-3.5 text-xl font-extrabold text-[#111] transition-colors hover:bg-[#ffd45a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98]"
+                className="mt-12 min-h-15.5 w-full cursor-pointer rounded-[18px] border border-[#514b3e] bg-[#ffe183] p-3.5 text-lg font-extrabold text-[#111] transition-colors hover:bg-[#ffd45a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98] sm:text-xl"
             >
-                LOG IN
+                CHANGE PASSWORD
             </button>
 
             <div className="mb-4 mt-6 flex items-center gap-5">
@@ -160,12 +184,12 @@ export default function LoginForm() {
             </div>
 
             <p className="text-center text-base">
-                Don't have an account?{" "}
+                Already have an account?{" "}
                 <Link
-                    href="/register"
+                    href="/login"
                     className="rounded-sm text-[#173caf] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98]"
                 >
-                    Sign up
+                    Login
                 </Link>
             </p>
         </form>
