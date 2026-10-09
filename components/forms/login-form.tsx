@@ -1,10 +1,14 @@
 "use client";
 
+
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Mail, LockKeyhole, Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation"
+import { inputStyle, fieldStyle, eyeButtonStyle } from "./form-styles"
 
 export default function LoginForm() {
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -23,27 +27,9 @@ export default function LoginForm() {
             return;
         }
 
-        setSuccess(true);
-        setPassword("");
-        setShowPassword(false);
+        router.push("/profile");
     }
 
-    const fieldStyle =
-        "flex min-h-[60px] items-center gap-3 rounded-[18px] " +
-        "border border-[#514b3e] bg-[#ffddb0] px-3.5 py-2 " +
-        "focus-within:ring-2 focus-within:ring-[#176c98] " +
-        "focus-within:ring-offset-2";
-
-    const inputStyle =
-        "w-full min-w-0 border-0 bg-transparent py-1.5 " +
-        "text-base text-[#111] outline-none placeholder:text-[#34302b] " +
-        "sm:text-xl";
-
-    const eyeButtonStyle =
-        "grid size-11 shrink-0 cursor-pointer place-items-center " +
-        "rounded-lg text-[#292929] hover:bg-black/5 " +
-        "focus-visible:outline-2 focus-visible:outline-offset-2 " +
-        "focus-visible:outline-[#176c98]";
 
     return (
         <form
@@ -151,6 +137,7 @@ export default function LoginForm() {
                 className="mt-8 min-h-15.5 w-full cursor-pointer rounded-[18px] border border-[#514b3e] bg-[#ffe183] p-3.5 text-xl font-extrabold text-[#111] transition-colors hover:bg-[#ffd45a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98]"
             >
                 LOG IN
+
             </button>
 
             <div className="mb-4 mt-6 flex items-center gap-5">
@@ -160,12 +147,21 @@ export default function LoginForm() {
             </div>
 
             <p className="text-center text-base">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
                     href="/register"
                     className="rounded-sm text-[#173caf] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98]"
                 >
                     Sign up
+                </Link>
+            </p>
+
+            <p className="text-center text-base">
+                <Link
+                    href="/recovery"
+                    className="rounded-sm text-[#173caf] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98]"
+                >
+                    Recover Account?
                 </Link>
             </p>
         </form>

@@ -3,6 +3,8 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { UserRound, Mail, LockKeyhole, Eye, EyeOff } from "lucide-react";
+import { inputStyle, fieldStyle, eyeButtonStyle } from "./form-styles"
+import { useRouter } from "next/navigation"
 
 export default function RegisterForm() {
     const [username, setUsername] = useState("");
@@ -15,6 +17,7 @@ export default function RegisterForm() {
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
+    const router = useRouter();
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -42,24 +45,9 @@ export default function RegisterForm() {
         setEmail("");
         setPassword("");
         setConfirmPassword("");
+
+        router.push("/login");
     }
-
-    const fieldStyle =
-        "flex min-h-[60px] items-center gap-3 rounded-[18px] " +
-        "border border-[#514b3e] bg-[#ffddb0] px-3.5 py-2 " +
-        "focus-within:ring-2 focus-within:ring-[#176c98] " +
-        "focus-within:ring-offset-2";
-
-    const inputStyle =
-        "w-full min-w-0 border-0 bg-transparent py-1.5 " +
-        "text-base text-[#111] outline-none placeholder:text-[#34302b] " +
-        "sm:text-xl";
-
-    const eyeButtonStyle =
-        "grid size-11 shrink-0 cursor-pointer place-items-center " +
-        "rounded-lg text-[#292929] hover:bg-black/5 " +
-        "focus-visible:outline-2 focus-visible:outline-offset-2 " +
-        "focus-visible:outline-[#176c98]";
 
     return (
         <form
@@ -114,6 +102,7 @@ export default function RegisterForm() {
                         onChange={(event) => setEmail(event.target.value)}
                         required
                         className={inputStyle}
+
                     />
                 </div>
 
@@ -223,9 +212,13 @@ export default function RegisterForm() {
 
             <button
                 type="submit"
+
                 className="mt-8 min-h-15.5 w-full cursor-pointer rounded-[18px] border border-[#514b3e] bg-[#ffe183] p-3.5 text-xl font-extrabold text-[#111] transition-colors hover:bg-[#ffd45a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98]"
+
             >
+
                 CREATE ACCOUNT
+
             </button>
 
             <div className="mb-4 mt-6 flex items-center gap-5">
