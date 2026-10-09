@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Mail, LockKeyhole, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation"
 import { inputStyle, fieldStyle, eyeButtonStyle } from "./form-styles"
+import { AuthValidator } from '@/validators/auth-validator';
+const authValidator = new AuthValidator();
 
 export default function LoginForm() {
     const router = useRouter();
@@ -22,8 +24,12 @@ export default function LoginForm() {
         setError("");
         setSuccess(false);
 
-        if (password.length < 8) {
-            setError("Password must have at least 8 characters.");
+        const result = authValidator.validateLogin({
+            email: email.trim(), password,
+        });
+
+        if (!result.valid) {
+            setError(result.error);
             return;
         }
 

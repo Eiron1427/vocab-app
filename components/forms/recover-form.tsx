@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { AuthValidator } from '@/validators/auth-validator';
+import PasswordStrength from './password-strength'
+
+
+const authValidator = new AuthValidator();
 
 type Step = "email" | "code" | "password" | "done";
 
@@ -75,16 +80,35 @@ export default function RecoveryForm() {
     async function handleEmailSubmit(e: FormEvent) {
         e.preventDefault();
         setError(null);
+
+        const normalizedEmail = email.trim();
+        const result =
+            authValidator.validateEmail(normalizedEmail);
+
+        if (!result.valid) {
+            setError(result.error);
+            return;
+        }
+
+        setEmail(normalizedEmail);
         setLoading(true);
+
         try {
-            await new Promise((r) => setTimeout(r, 700));
+            // Existing simulation; no email is actually sent.
+            await new Promise((resolve) =>
+                setTimeout(resolve, 700)
+            );
+
+            setCode("");
             setStep("code");
         } catch {
-            setError("We couldn't send the code. Check the address and try again.");
+            setError(
+                "We couldn't send the code. Please try again."
+            );
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     async function handleCodeSubmit(e: FormEvent) {
         e.preventDefault();
@@ -155,7 +179,8 @@ export default function RecoveryForm() {
                             <div className={fieldWrapClass}>
                                 <EnvelopeIcon />
                                 <input
-                                    type="text"
+                                    type="email"
+                                    autoComplete="email"
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -241,8 +266,11 @@ export default function RecoveryForm() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter new password"
                                     className={fieldInputClass}
+                                    aria-describedby="recovery-password-hint"
                                 />
+
                             </div>
+                            <PasswordStrength id="password-hint" password={password} />
                             <div className={fieldWrapClass}>
                                 <LockIcon />
                                 <input
@@ -253,6 +281,7 @@ export default function RecoveryForm() {
                                     placeholder="Confirm new password"
                                     className={fieldInputClass}
                                 />
+
                             </div>
                             <button type="submit" className={primaryBtnClass} disabled={loading}>
                                 {loading ? "RECOVERING..." : "RECOVER ACCOUNT"}

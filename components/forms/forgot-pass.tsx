@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { LockKeyhole, Eye, EyeOff } from "lucide-react";
 import { inputStyle, fieldStyle, eyeButtonStyle } from "./form-styles"
+import PasswordStrength from './password-strength'
 
 export default function ForgotPasswordForm() {
     const [password, setPassword] = useState("");
@@ -131,9 +132,7 @@ export default function ForgotPasswordForm() {
                 </div>
             </div>
 
-            <p id="reset-password-hint" className="mt-3 text-sm">
-                Dapat 8 characters ang Password mo
-            </p>
+            <PasswordStrength id="password-hint" password={password} />
 
             {error && (
                 <p

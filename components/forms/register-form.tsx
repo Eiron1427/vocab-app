@@ -5,6 +5,12 @@ import Link from "next/link";
 import { UserRound, Mail, LockKeyhole, Eye, EyeOff } from "lucide-react";
 import { inputStyle, fieldStyle, eyeButtonStyle } from "./form-styles"
 import { useRouter } from "next/navigation"
+import { AuthValidator } from '@/validators/auth-validator';
+import PasswordStrength from './password-strength'
+
+
+
+const authValidator = new AuthValidator();
 
 export default function RegisterForm() {
     const [username, setUsername] = useState("");
@@ -25,18 +31,15 @@ export default function RegisterForm() {
         setError("");
         setSuccess(false);
 
-        if (!username.trim()) {
-            setError("username ang ilagay");
-            return;
-        }
+        const result = authValidator.validateRegistration({
+            username: username.trim(),
+            email: email.trim(),
+            password,
+            confirmPassword,
+        });
 
-        if (password.length < 8) {
-            setError("8 characters ang password.");
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            setError("Ulit, mali password mo");
+        if (!result.valid) {
+            setError(result.error);
             return;
         }
 
@@ -45,6 +48,8 @@ export default function RegisterForm() {
         setEmail("");
         setPassword("");
         setConfirmPassword("");
+        setShowPassword(false);
+        setShowConfirmPassword(false);
 
         router.push("/login");
     }
@@ -188,9 +193,7 @@ export default function RegisterForm() {
                 </div>
             </div>
 
-            <p id="password-hint" className="mt-3 text-sm">
-                Dapat 8 characters ang Password mo
-            </p>
+            <PasswordStrength id="password-hint" password={password} />
 
             {error && (
                 <p
