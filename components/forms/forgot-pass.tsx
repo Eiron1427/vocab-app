@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+<<<<<<< HEAD
 import { LockKeyhole, Eye, EyeOff } from "lucide-react";
 import { inputStyle, fieldStyle, eyeButtonStyle } from "./form-styles"
 
@@ -11,6 +12,14 @@ export default function ForgotPasswordForm() {
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+=======
+import { Mail, LockKeyhole, Eye, EyeOff } from "lucide-react";
+
+export default function ForgotPass() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+>>>>>>> 2e5d4f00a20ce2d02a367e5345e7c9cac7566892
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
@@ -26,6 +35,7 @@ export default function ForgotPasswordForm() {
             return;
         }
 
+<<<<<<< HEAD
         if (password !== confirmPassword) {
             setError("Passwords do not match.");
             return;
@@ -177,4 +187,10 @@ export default function ForgotPasswordForm() {
             </p>
         </form>
     );
+=======
+        setSuccess(true);
+        setPassword("");
+        setShowPassword(false);
+    }
+>>>>>>> 2e5d4f00a20ce2d02a367e5345e7c9cac7566892
 }
