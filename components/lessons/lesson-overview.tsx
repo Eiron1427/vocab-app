@@ -5,102 +5,167 @@ import {
     BookOpen, Lock, ArrowLeft, Sparkles,
     Volume2, ArrowRight, PartyPopper,
 } from 'lucide-react';
+import { LESSON_DATA } from "@/data/lesson";
+import { LessonService } from '@/services/lesson-service';
+import type { Lesson } from '@/types/lesson'
 
-interface Lesson {
-    id: number;
-    title: string;
-    level: string;
-    unlocked: boolean;
-    progressCount: number;
-    maxProgress: number;
-}
 
-interface VocabItem {
-    word: string;
-    meaning: string;
-    emoji: string;
-    levelText: string;
-}
-
+const lessonService = new LessonService(LESSON_DATA);
 export default function LessonOverview() {
-    const [currentView, setCurrentView] = useState<'lessons' | 'detail' | 'completion'>('lessons');
-    const [activeLessonId, setActiveLessonId] = useState<number>(1);
-    const [vocabIndex, setVocabIndex] = useState<number>(0);
-    const [showAlert, setShowAlert] = useState<boolean>(false);
-    const [alertMessage, setAlertMessage] = useState<string>('');
+    const [currentView, setCurrentView] = useState<
+        "lessons" | "levels" | "detail" | "completion"
+    >("lessons");
 
-    const [lessons, setLessons] = useState<Lesson[]>([
-        { id: 1, title: 'Lesson 1', level: 'Level 1/10', unlocked: true, progressCount: 1, maxProgress: 10 },
-        { id: 2, title: 'Lesson 2', level: 'Level 0/10', unlocked: false, progressCount: 0, maxProgress: 10 },
-        { id: 3, title: 'Lesson 3', level: 'Level 0/10', unlocked: false, progressCount: 0, maxProgress: 10 },
-        { id: 4, title: 'Lesson 4', level: 'Level 0/10', unlocked: false, progressCount: 0, maxProgress: 10 },
-        { id: 5, title: 'Lesson 5', level: 'Level 0/10', unlocked: false, progressCount: 0, maxProgress: 10 },
-        { id: 6, title: 'Lesson 6', level: 'Level 0/10', unlocked: false, progressCount: 0, maxProgress: 10 },
-        { id: 7, title: 'Lesson 7', level: 'Level 0/10', unlocked: false, progressCount: 0, maxProgress: 10 },
-        { id: 8, title: 'Lesson 8', level: 'Level 0/10', unlocked: false, progressCount: 0, maxProgress: 10 },
-        { id: 9, title: 'Lesson 9', level: 'Level 0/10', unlocked: false, progressCount: 0, maxProgress: 10 },
-        { id: 10, title: 'Lesson 10', level: 'Level 0/10', unlocked: false, progressCount: 0, maxProgress: 10 },
-    ]);
+    const [activeLessonId, setActiveLessonId] = useState(1);
+    const [activeLevelId, setActiveLevelId] = useState(1);
+    const [vocabIndex, setVocabIndex] = useState(0);
 
-    const vocabItems: VocabItem[] = [
-        { word: 'apple', meaning: 'A round fruit that grows on trees.', emoji: '🍎', levelText: 'Level 1-1' },
-        { word: 'banana', meaning: 'A long curved yellow fruit with a sweet taste.', emoji: '🍌', levelText: 'Level 1-2' },
-        { word: 'carrot', meaning: 'A crunchy orange root vegetable packed with vitamins.', emoji: '🥕', levelText: 'Level 1-3' },
-    ];
+    const [completedLevels, setCompletedLevels] =
+        useState<string[]>([]);
 
-    const handleLessonClick = (lesson: Lesson): void => {
-        if (lesson.unlocked) {
-            setActiveLessonId(lesson.id);
-            setVocabIndex(0);
-            setCurrentView('detail');
-        } else {
-            setAlertMessage('Finished the current lesson to unlock');
-            setShowAlert(true);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
+
+    const activeLesson =
+        lessonService.getLesson(activeLessonId);
+
+    const activeLevel =
+        activeLesson.getLevel(activeLevelId);
+
+    const vocabItems = activeLevel?.words ?? [];
+
+    const lessons: Lesson[] = lessonService
+        .getLessons()
+        .map((lesson) => {
+            const count = lesson.completedCount(completedLevels);
+
+            return {
+                id: lesson.id,
+                title: lesson.title,
+                level: `${count}/${lesson.totalLevels} completed`,
+                unlocked: lessonService.isLessonUnlocked(
+                    lesson.id,
+                    completedLevels,
+                ),
+                progressCount: count,
+                maxProgress: lesson.totalLevels,
+            };
+        });
+
+    const responsiveProgressText =
+        `${activeLesson.completedCount(completedLevels)}` +
+        `/${activeLesson.totalLevels}`;
+
+    function showNotice(message: string) {
+        setAlertMessage(message);
+        setShowAlert(true);
+    }
+
+    function handleLessonClick(lesson: Lesson) {
+        if (!lesson.unlocked) {
+            showNotice(
+                "Complete all levels in the previous lesson to unlock this lesson.",
+            );
+            return;
         }
-    };
 
-    const handlePronounce = (word: string): void => {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.rate = 0.9;
-            window.speechSynthesis.speak(utterance);
+        setActiveLessonId(lesson.id);
+        setCurrentView("levels");
+    }
+
+    function handleLevelClick(levelId: number) {
+        const level = activeLesson.getLevel(levelId);
+
+        if (!level?.words.length) {
+            showNotice("This level is coming soon.");
+            return;
         }
-    };
 
-    const handleNextVocab = (): void => {
+        if (
+            !lessonService.canOpenLevel(
+                activeLessonId,
+                levelId,
+                completedLevels,
+            )
+        ) {
+            showNotice("Complete the previous level first.");
+            return;
+        }
+
+        setActiveLevelId(levelId);
+        setVocabIndex(0);
+        setCurrentView("detail");
+    }
+
+    function handlePronounce(word: string) {
+        if (!("speechSynthesis" in window)) {
+            showNotice(
+                "Pronunciation is not available in this browser.",
+            );
+            return;
+        }
+
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.lang = "en-US";
+        utterance.rate = 0.9;
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function stopPronunciation() {
+        if ("speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    function handleNextVocab() {
+        stopPronunciation();
+
+        if (!vocabItems.length) return;
+
         if (vocabIndex < vocabItems.length - 1) {
-            setVocabIndex(vocabIndex + 1);
-        } else {
-            setCurrentView('completion');
+            setVocabIndex((previous) => previous + 1);
+            return;
         }
-    };
 
-    const handlePrevVocab = (): void => {
-        if (vocabIndex > 0) {
-            setVocabIndex(vocabIndex - 1);
-        } else {
-            setCurrentView('lessons');
-        }
-    };
-
-    const handleCompleteFinish = (): void => {
-        setLessons(prevLessons =>
-            prevLessons.map(l => {
-                if (l.id === activeLessonId) {
-                    const newProg = Math.min(l.progressCount + 1, l.maxProgress);
-                    return { ...l, progressCount: newProg, level: `Level ${newProg}/${l.maxProgress}` };
-                }
-                if (l.id === activeLessonId + 1) {
-                    return { ...l, unlocked: true, level: 'Level 1/10', progressCount: 1 };
-                }
-                return l;
-            })
+        setCompletedLevels((previous) =>
+            lessonService.completeLevel(
+                activeLessonId,
+                activeLevelId,
+                previous,
+            ),
         );
-        setCurrentView('lessons');
-    };
 
-    const completedLessonsCount = lessons.filter(l => l.progressCount > 0 && l.id <= activeLessonId).length;
-    const responsiveProgressText = `${Math.max(completedLessonsCount, activeLessonId)}/10`;
+        setCurrentView("completion");
+    }
+
+    function handlePrevVocab() {
+        stopPronunciation();
+
+        if (vocabIndex > 0) {
+            setVocabIndex((previous) => previous - 1);
+        } else {
+            setCurrentView("levels");
+        }
+    }
+
+    function handleCompleteFinish() {
+        setCurrentView("levels");
+    }
+
+    function handleBack() {
+        stopPronunciation();
+
+        if (currentView === "lessons") {
+            showNotice("You are already on the lesson-selection page.");
+        } else if (currentView === "levels") {
+            setCurrentView("lessons");
+        } else {
+            setCurrentView("levels");
+        }
+    }
 
     return (
         <div className="relative flex w-full flex-col items-center pb-6 font-sans">
@@ -110,14 +175,8 @@ export default function LessonOverview() {
             {/* Top Header Navigation Bar */}
             <div className="relative z-10 w-full max-w-md px-6 pt-6 pb-2 flex items-center justify-between">
                 <button
-                    onClick={() => {
-                        if (currentView === 'lessons') {
-                            setAlertMessage('You are already on the main page.');
-                            setShowAlert(true);
-                        } else {
-                            setCurrentView('lessons');
-                        }
-                    }}
+                    onClick={handleBack
+                    }
                     className="flex items-center gap-2 bg-white/95 hover:bg-white text-stone-700 hover:text-stone-900 px-4 py-2.5 rounded-full shadow-md font-bold text-sm transition-all transform active:scale-95 border border-stone-200 cursor-pointer"
                 >
                     <ArrowLeft className="w-4 h-4" />
@@ -146,8 +205,8 @@ export default function LessonOverview() {
                                     key={lesson.id}
                                     onClick={() => handleLessonClick(lesson)}
                                     className={`relative group flex items-center justify-between px-4 py-3.5 rounded-full cursor-pointer transition-all duration-200 border ${lesson.unlocked
-                                            ? 'bg-[#ffd8a8] hover:bg-[#ffe5c4] border-amber-300 shadow-md transform hover:-translate-y-0.5'
-                                            : 'bg-stone-300/80 hover:bg-stone-300 border-stone-400/60 opacity-90'
+                                        ? 'bg-[#ffd8a8] hover:bg-[#ffe5c4] border-amber-300 shadow-md transform hover:-translate-y-0.5'
+                                        : 'bg-stone-300/80 hover:bg-stone-300 border-stone-400/60 opacity-90'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
@@ -177,8 +236,68 @@ export default function LessonOverview() {
                 </div>
             )}
 
+            {currentView === "levels" && (
+                <div className="relative z-10 w-full max-w-md px-5 pt-2 pb-8">
+                    <section className="mt-2 rounded-[2.5rem] border-4 border-white/90 bg-white/95 p-6 shadow-2xl">
+                        <h1 className="text-center text-2xl font-black text-stone-900">
+                            {activeLesson.title}
+                        </h1>
+
+                        <p className="mt-2 text-center text-sm text-stone-600">
+                            Select a level · {responsiveProgressText} completed
+                        </p>
+
+                        <div className="mt-5 grid grid-cols-2 gap-3">
+                            {activeLesson.levels.map((level) => {
+                                const available = level.words.length > 0;
+
+                                const completed = activeLesson.isLevelCompleted(
+                                    level.id,
+                                    completedLevels,
+                                );
+
+                                const unlocked = lessonService.canOpenLevel(
+                                    activeLessonId,
+                                    level.id,
+                                    completedLevels,
+                                );
+
+                                const status = !available
+                                    ? "Coming soon"
+                                    : completed
+                                        ? "Completed"
+                                        : unlocked
+                                            ? "Start"
+                                            : "Locked";
+
+                                return (
+                                    <button
+                                        key={level.id}
+                                        type="button"
+                                        onClick={() => handleLevelClick(level.id)}
+                                        className={`rounded-2xl border p-4 text-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-700 ${unlocked
+                                            ? "border-amber-300 bg-[#ffd8a8] hover:bg-[#ffe5c4]"
+                                            : "border-stone-300 bg-stone-200"
+                                            }`}
+                                    >
+                                        <span className="block font-extrabold text-stone-900">
+                                            Level {level.id}
+                                        </span>
+
+                                        <span className="mt-1 block text-xs text-stone-700">
+                                            {status}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </section>
+                </div>
+            )}
+
+
             {/* VIEW 2: LESSON ITEM DETAIL VIEW */}
-            {currentView === 'detail' && (
+            {currentView === 'detail' && vocabItems[vocabIndex] && (
                 <div className="relative z-10 w-full max-w-md px-5 pt-2 pb-8 flex flex-col items-center">
                     <div className="w-full bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-2xl border-4 border-white/90 p-6 mt-2 flex flex-col items-center text-center">
 
@@ -207,7 +326,7 @@ export default function LessonOverview() {
                         </div>
 
                         {/* Divider Line */}
-                        <div className="w-full h-[2px] bg-stone-300 mb-5"></div>
+                        <div className="w-full h-0.5 bg-stone-300 mb-5"></div>
 
                         {/* Meaning Section */}
                         <div className="w-full bg-stone-50/90 rounded-2xl p-4 text-left border border-stone-200/60 mb-6 shadow-inner">
@@ -261,11 +380,11 @@ export default function LessonOverview() {
                         {/* Celebration Icon */}
                         <div className="w-32 h-32 bg-amber-100 rounded-full flex items-center justify-center shadow-inner mb-4 relative overflow-hidden">
                             <PartyPopper className="w-16 h-16 text-amber-600 animate-pulse" />
-                            <div className="absolute inset-0 bg-gradient-to-tr from-amber-400/20 to-orange-400/20 pointer-events-none"></div>
+                            <div className="absolute inset-0 bg-linear-to-tr from-amber-400/20 to-orange-400/20 pointer-events-none"></div>
                         </div>
 
                         <h1 className="text-3xl font-black text-stone-900 tracking-tight mb-6">
-                            Congratulations!!!!
+                            Level Complete!
                         </h1>
 
                         {/* Responsive Progress Row */}
@@ -297,7 +416,7 @@ export default function LessonOverview() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
                     <div className="bg-white rounded-3xl p-6 max-w-xs w-full shadow-2xl border-4 border-orange-200 text-center relative overflow-hidden">
 
-                        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-400 to-amber-400"></div>
+                        <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-orange-400 to-amber-400"></div>
 
                         <div className="w-14 h-14 bg-orange-100 text-orange-600 rounded-2xl mx-auto flex items-center justify-center shadow-inner mb-4 mt-2">
                             <Lock className="w-7 h-7" />
@@ -310,7 +429,7 @@ export default function LessonOverview() {
 
                         <button
                             onClick={() => setShowAlert(false)}
-                            className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl shadow-md transition-all transform active:scale-95 cursor-pointer"
+                            className="w-full py-3 bg-linear-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl shadow-md transition-all transform active:scale-95 cursor-pointer"
                         >
                             Got it!
                         </button>
