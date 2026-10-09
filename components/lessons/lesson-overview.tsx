@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAppState } from '@/hooks/use-app-state';
+import { settingsService, speechService } from '@/lib/app-services';
 import {
     BookOpen, Lock, ArrowLeft, Sparkles,
     Volume2, ArrowRight, PartyPopper,
@@ -20,8 +22,9 @@ export default function LessonOverview() {
     const [activeLevelId, setActiveLevelId] = useState(1);
     const [vocabIndex, setVocabIndex] = useState(0);
 
-    const [completedLevels, setCompletedLevels] =
-        useState<string[]>([]);
+    const { state, ready } = useAppState();
+    const completedLevels = state.completedLevels;
+    useEffect(() => () => speechService.stop(), []);
 
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
@@ -98,26 +101,15 @@ export default function LessonOverview() {
     }
 
     function handlePronounce(word: string) {
-        if (!("speechSynthesis" in window)) {
-            showNotice(
-                "Pronunciation is not available in this browser.",
-            );
-            return;
+        try {
+            speechService.speak(word, state.volume, showNotice);
+        } catch (error) {
+            showNotice((error as Error).message);
         }
-
-        window.speechSynthesis.cancel();
-
-        const utterance = new SpeechSynthesisUtterance(word);
-        utterance.lang = "en-US";
-        utterance.rate = 0.9;
-
-        window.speechSynthesis.speak(utterance);
     }
 
     function stopPronunciation() {
-        if ("speechSynthesis" in window) {
-            window.speechSynthesis.cancel();
-        }
+        speechService.stop();
     }
 
     function handleNextVocab() {
@@ -130,13 +122,18 @@ export default function LessonOverview() {
             return;
         }
 
-        setCompletedLevels((previous) =>
-            lessonService.completeLevel(
-                activeLessonId,
-                activeLevelId,
-                previous,
-            ),
-        );
+        try {
+            settingsService.setCompletedLevels(
+                lessonService.completeLevel(
+                    activeLessonId,
+                    activeLevelId,
+                    completedLevels,
+                ),
+            );
+        } catch (error) {
+            showNotice((error as Error).message);
+            return;
+        }
 
         setCurrentView("completion");
     }
@@ -166,6 +163,8 @@ export default function LessonOverview() {
             setCurrentView("levels");
         }
     }
+
+    if (!ready) return <p role="status" className="rounded-2xl bg-white/90 p-5">Loading lesson progress…</p>;
 
     return (
         <div className="relative flex w-full flex-col items-center pb-6 font-sans">

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { AuthValidator } from '@/validators/auth-validator';
 import PasswordStrength from './password-strength'
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 
 const authValidator = new AuthValidator();
@@ -54,36 +56,54 @@ function KeyIcon() {
     );
 }
 
-function CheckIcon() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-        >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-    );
-}
-
 export default function RecoveryForm() {
     const [step, setStep] = useState<Step>("email");
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    async function handleEmailSubmit(e: FormEvent) {
-        e.preventDefault();
+    const router = useRouter();
+    const [previewCode, setPreviewCode] = useState("");
+
+    useEffect(() => {
+        if (step !== "done") return;
+
+        const timer = window.setTimeout(() => {
+            router.replace("/login");
+        }, 2000);
+
+        return () => window.clearTimeout(timer);
+    }, [step, router]);
+
+    function createPreviewCode() {
+        const values = new Uint32Array(1);
+        crypto.getRandomValues(values);
+
+        setPreviewCode(
+            String(100000 + (values[0] % 900000))
+        );
+
+        setCode("");
+        setError(null);
+    }
+
+    function changeEmail() {
+        setCode("");
+        setPreviewCode("");
+        setPassword("");
+        setConfirm("");
+        setError(null);
+        setStep("email");
+    }
+
+    function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
         setError(null);
 
         const normalizedEmail = email.trim();
-        const result =
-            authValidator.validateEmail(normalizedEmail);
+        const result = authValidator.validateEmail(normalizedEmail);
 
         if (!result.valid) {
             setError(result.error);
@@ -91,60 +111,41 @@ export default function RecoveryForm() {
         }
 
         setEmail(normalizedEmail);
-        setLoading(true);
-
-        try {
-            // Existing simulation; no email is actually sent.
-            await new Promise((resolve) =>
-                setTimeout(resolve, 700)
-            );
-
-            setCode("");
-            setStep("code");
-        } catch {
-            setError(
-                "We couldn't send the code. Please try again."
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    async function handleCodeSubmit(e: FormEvent) {
-        e.preventDefault();
-        setError(null);
-        setLoading(true);
-        try {
-            await new Promise((r) => setTimeout(r, 700));
-            if (code.length !== 6) throw new Error("invalid");
-            setStep("password");
-        } catch {
-            setError("That code didn't match. Check your inbox and try again.");
-        } finally {
-            setLoading(false);
-        }
+        createPreviewCode();
+        setStep("code");
     }
 
-    async function handlePasswordSubmit(e: FormEvent) {
-        e.preventDefault();
+    function handleCodeSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
         setError(null);
-        if (password.length < 8) {
-            setError("Use at least 8 characters.");
+
+        if (!/^\d{6}$/.test(code) || code !== previewCode) {
+            setError("The code does not match. Please try again.");
             return;
         }
-        if (password !== confirm) {
-            setError("Passwords don't match.");
+
+        setPreviewCode("");
+        setCode("");
+        setStep("password");
+    }
+
+    function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setError(null);
+
+        const result = authValidator.validatePassword({
+            password,
+            confirmPassword: confirm,
+        });
+
+        if (!result.valid) {
+            setError(result.error);
             return;
         }
-        setLoading(true);
-        try {
-            await new Promise((r) => setTimeout(r, 700));
-            setStep("done");
-        } catch {
-            setError("We couldn't reset your password. Try again.");
-        } finally {
-            setLoading(false);
-        }
+
+        setPassword("");
+        setConfirm("");
+        setStep("done");
     }
 
     const fieldWrapClass =
@@ -172,8 +173,9 @@ export default function RecoveryForm() {
 
                 {step === "email" && (
                     <>
-                        <p className="text-gray-800 mb-6">
-                            Recover your account by entering the email you used to login
+                        <p className="mb-6 text-gray-800">
+                            Enter the email address associated with your account
+                            to start recovery.
                         </p>
                         <form onSubmit={handleEmailSubmit} className="flex flex-col gap-5">
                             <div className={fieldWrapClass}>
@@ -188,32 +190,41 @@ export default function RecoveryForm() {
                                     className={fieldInputClass}
                                 />
                             </div>
-                            <button type="submit" className={primaryBtnClass} disabled={loading}>
-                                {loading ? "SENDING..." : "SEND RECOVERY EMAIL"}
+                            <button type="submit" className={primaryBtnClass}>
+                                CONTINUE
                             </button>
                         </form>
-
-                        <div className="flex items-center gap-3 my-5">
-                            <div className="flex-1 h-px bg-gray-300" />
-                            <span className="text-xl font-bold">OR</span>
-                            <div className="flex-1 h-px bg-gray-300" />
-                        </div>
-
-                        <p className="text-center text-sm text-gray-900">
-                            Already have an account?{" "}
-                            <a href="/login" className="text-blue-700 underline font-medium">
-                                Login
-                            </a>
-                        </p>
                     </>
+                )}
+
+                {step !== "done" && (
+                    <p className="mt-6 text-center">
+                        <Link
+                            href="/login"
+                            className="rounded text-sm font-medium text-blue-700 underline"
+                        >
+                            Back to login
+                        </Link>
+                    </p>
                 )}
 
                 {step === "code" && (
                     <>
-                        <p className="text-gray-800 mb-6">
-                            Enter the 6-digit recovery code sent to{" "}
-                            <span className="font-semibold">{email}</span>
+                        <p className="mb-4 text-gray-800">
+                            Recovery email:{" "}
+                            <span className="break-all font-semibold">{email}</span>
                         </p>
+
+                        <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                            <p>
+                                Email delivery is not connected yet. Use this code
+                                to try the recovery flow:
+                            </p>
+                            <p className="mt-2 text-center text-2xl font-bold tracking-widest">
+                                {previewCode}
+                            </p>
+                        </div>
+
                         <form onSubmit={handleCodeSubmit} className="flex flex-col gap-5">
                             <div className={fieldWrapClass}>
                                 <KeyIcon />
@@ -226,10 +237,13 @@ export default function RecoveryForm() {
                                     onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
                                     placeholder="Enter code"
                                     className={`${fieldInputClass} tracking-[0.4em] text-center`}
+                                    aria-label="Recovery code"
+                                    minLength={6}
+                                    pattern="[0-9]{6}"
                                 />
                             </div>
-                            <button type="submit" className={primaryBtnClass} disabled={loading}>
-                                {loading ? "VERIFYING..." : "VERIFY CODE"}
+                            <button type="submit" className={primaryBtnClass}>
+                                VERIFY CODE
                             </button>
                         </form>
 
@@ -239,22 +253,30 @@ export default function RecoveryForm() {
                             <div className="flex-1 h-px bg-gray-300" />
                         </div>
 
-                        <p className="text-center text-sm text-gray-900">
-                            Wrong email?{" "}
+                        <div className="mt-5 flex flex-wrap justify-between gap-3 text-sm">
                             <button
-                                onClick={() => setStep("email")}
-                                className="text-blue-700 underline font-medium"
+                                type="button"
+                                onClick={changeEmail}
+                                className="rounded px-2 py-2 font-medium text-blue-700 underline"
                             >
-                                Go back
+                                Change email
                             </button>
-                        </p>
+
+                            <button
+                                type="button"
+                                onClick={createPreviewCode}
+                                className="rounded px-2 py-2 font-medium text-blue-700 underline"
+                            >
+                                Generate another code
+                            </button>
+                        </div>
                     </>
                 )}
 
                 {step === "password" && (
                     <>
-                        <p className="text-gray-800 mb-6">
-                            Recover your account by setting a new password
+                        <p className="mb-6 text-gray-800">
+                            Enter and confirm a new password.
                         </p>
                         <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-5">
                             <div className={fieldWrapClass}>
@@ -267,10 +289,16 @@ export default function RecoveryForm() {
                                     placeholder="Enter new password"
                                     className={fieldInputClass}
                                     aria-describedby="recovery-password-hint"
+                                    minLength={8}
+                                    autoComplete="new-password"
+                                    aria-label="New password"
                                 />
 
                             </div>
-                            <PasswordStrength id="password-hint" password={password} />
+                            <PasswordStrength
+                                id="recovery-password-hint"
+                                password={password}
+                            />
                             <div className={fieldWrapClass}>
                                 <LockIcon />
                                 <input
@@ -280,27 +308,40 @@ export default function RecoveryForm() {
                                     onChange={(e) => setConfirm(e.target.value)}
                                     placeholder="Confirm new password"
                                     className={fieldInputClass}
+                                    minLength={8}
+                                    autoComplete="new-password"
+                                    aria-label="Confirm new password"
                                 />
 
                             </div>
-                            <button type="submit" className={primaryBtnClass} disabled={loading}>
-                                {loading ? "RECOVERING..." : "RECOVER ACCOUNT"}
+                            <button type="submit" className={primaryBtnClass}>
+                                CONTINUE
                             </button>
                         </form>
                     </>
                 )}
 
                 {step === "done" && (
-                    <div className="flex flex-col items-center text-center pt-2">
-                        <div className="rounded-full bg-green-200 border-2 border-gray-900 text-green-800 p-3 mb-4">
-                            <CheckIcon />
+                    <div className="pt-2 text-center">
+                        <div
+                            role="status"
+                            aria-live="polite"
+                            className="rounded-xl border border-green-200 bg-green-50 p-4 text-green-800"
+                        >
+                            <p className="font-semibold">
+                                Password checks passed.
+                            </p>
+                            <p className="mt-2 text-sm">
+                                No account password was changed. Opening login…
+                            </p>
                         </div>
-                        <p className="text-gray-800 mb-6">
-                            Your account has been recovered. You can now sign in with your new password.
-                        </p>
-                        <a href="/login" className={`${primaryBtnClass} text-center block`}>
-                            BACK TO SIGN IN
-                        </a>
+
+                        <Link
+                            href="/login"
+                            className={`${primaryBtnClass} mt-5`}
+                        >
+                            BACK TO LOGIN
+                        </Link>
                     </div>
                 )}
             </div>

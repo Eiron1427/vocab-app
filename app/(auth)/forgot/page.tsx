@@ -1,4 +1,4 @@
-import ForgotPasswordForm from "@/components/forms/forgot-pass";
+import RecoveryForm from "@/components/forms/recover-form";
 
 export default function ForgotPasswordPage() {
     return (
@@ -8,16 +8,12 @@ export default function ForgotPasswordPage() {
         >
             <h1
                 id="forgot-password-heading"
-                className="text-center text-5xl font-extrabold leading-tight sm:text-4xl"
+                className="mb-6 text-center text-4xl font-extrabold leading-tight"
             >
-                Forgot Password
+                Forgot Password?
             </h1>
 
-            <p className="mb-10 mt-2 text-center text-lg">
-                Change your password
-            </p>
-
-            <ForgotPasswordForm />
+            <RecoveryForm />
         </section>
     );
 }

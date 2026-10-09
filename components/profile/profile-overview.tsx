@@ -1,16 +1,11 @@
+"use client";
+
+import { useAppState } from "@/hooks/use-app-state";
 import ProgressBar from "@/components/ui/progress-bar";
 import {
-    BookOpen,
-    ListChecks,
-    Star,
-    ChartNoAxesColumn,
-    Target,
-    Trophy,
-    User,
-    Check,
+    BookOpen, ListChecks, Star, ChartNoAxesColumn, Target, Trophy, Check,
 } from "lucide-react";
-
-import { SquarePen } from "lucide-react"
+import ProfileAvatar from '@/components/profile/profile-avatar'
 
 const stats = [
     { icon: BookOpen, value: "25", label: "Lessons\nCompleted" },
@@ -29,16 +24,18 @@ const progress = [
 
 
 export default function ProfileOverview() {
+    const { state } = useAppState();
     return (
         <section className="rounded-[26px] bg-white/55 p-4 sm:p-5 backdrop-blur-sm">
-            <div className="-mt-1 flex items-center gap-3">
-                <div className="flex h-15 w-15 shrink-0 items-center justify-center rounded-full border-[3px] border-black bg-white">
-                    <User className="h-9 w-9 fill-black" strokeWidth={0} />
-                </div>
-                <div className="min-w-0 flex-1">
-                    <h1 className="text-2xl sm:text-[30px] font-bold leading-tight text-black">EJ Ramores</h1> <SquarePen />
+            <div className="mt-2 flex items-center gap-4">
+                <ProfileAvatar />
 
-                    <div className="mt-2 flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                    <h1 className="wrap-break-word text-3xl font-bold leading-tight text-black sm:text-4xl">
+                        {state.profile.username}
+                    </h1>
+
+                    <div className="mt-3 flex items-center gap-3">
                         <div className="min-w-0 flex-1">
                             <ProgressBar value={45} label="Level progress" />
                         </div>
@@ -47,7 +44,7 @@ export default function ProfileOverview() {
                 </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-4 gap-2.5">
+            <div className="mt-2 grid grid-cols-4 gap-2.5">
                 {stats.map(({ icon: Icon, value, label }) => (
                     <div key={label} className="flex flex-col items-center rounded-2xl bg-white px-1 py-2 shadow-md">
                         <Icon className="h-8 w-8" strokeWidth={1.8} />
