@@ -1,6 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
@@ -10,13 +9,6 @@ import { inputStyle, fieldStyle, eyeButtonStyle } from "./form-styles"
 
 export default function LoginForm() {
     const router = useRouter();
-=======
-import { useState, type FormEvent } from "react";
-import Link from "next/link";
-import { Mail, LockKeyhole, Eye, EyeOff } from "lucide-react";
-
-export default function LoginForm() {
->>>>>>> 2e5d4f00a20ce2d02a367e5345e7c9cac7566892
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -35,33 +27,9 @@ export default function LoginForm() {
             return;
         }
 
-<<<<<<< HEAD
         router.push("/profile");
     }
 
-=======
-        setSuccess(true);
-        setPassword("");
-        setShowPassword(false);
-    }
-
-    const fieldStyle =
-        "flex min-h-[60px] items-center gap-3 rounded-[18px] " +
-        "border border-[#514b3e] bg-[#ffddb0] px-3.5 py-2 " +
-        "focus-within:ring-2 focus-within:ring-[#176c98] " +
-        "focus-within:ring-offset-2";
-
-    const inputStyle =
-        "w-full min-w-0 border-0 bg-transparent py-1.5 " +
-        "text-base text-[#111] outline-none placeholder:text-[#34302b] " +
-        "sm:text-xl";
-
-    const eyeButtonStyle =
-        "grid size-11 shrink-0 cursor-pointer place-items-center " +
-        "rounded-lg text-[#292929] hover:bg-black/5 " +
-        "focus-visible:outline-2 focus-visible:outline-offset-2 " +
-        "focus-visible:outline-[#176c98]";
->>>>>>> 2e5d4f00a20ce2d02a367e5345e7c9cac7566892
 
     return (
         <form
@@ -137,7 +105,6 @@ export default function LoginForm() {
                 </div>
             </div>
 
-<<<<<<< HEAD
             <div className="mt-4 text-right">
                 <Link
                     href="/forgot"
@@ -146,16 +113,6 @@ export default function LoginForm() {
                     Forgot password?
                 </Link>
             </div>
-=======
-            <p id="login-password-hint" className="mt-3 text-sm" >
-                <Link
-                    href="/forgot"
-                    className="rounded-sm text-[#173caf] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98]"
-                >Forgot Password?
-                </Link>
-
-            </p>
->>>>>>> 2e5d4f00a20ce2d02a367e5345e7c9cac7566892
 
             {error && (
                 <p
@@ -180,28 +137,16 @@ export default function LoginForm() {
                 className="mt-8 min-h-15.5 w-full cursor-pointer rounded-[18px] border border-[#514b3e] bg-[#ffe183] p-3.5 text-xl font-extrabold text-[#111] transition-colors hover:bg-[#ffd45a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98]"
             >
                 LOG IN
-<<<<<<< HEAD
-
-=======
->>>>>>> 2e5d4f00a20ce2d02a367e5345e7c9cac7566892
             </button>
 
             <div className="mb-4 mt-6 flex items-center gap-5">
                 <span className="h-px flex-1 bg-[#514b3e]" />
-<<<<<<< HEAD
                 <span className="text-xl font-bold">OR</span>
-=======
-                <span className="text-xl">OR</span>
->>>>>>> 2e5d4f00a20ce2d02a367e5345e7c9cac7566892
                 <span className="h-px flex-1 bg-[#514b3e]" />
             </div>
 
             <p className="text-center text-base">
-<<<<<<< HEAD
                 Don&apos;t have an account?{" "}
-=======
-                Don't have an account?{" "}
->>>>>>> 2e5d4f00a20ce2d02a367e5345e7c9cac7566892
                 <Link
                     href="/register"
                     className="rounded-sm text-[#173caf] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176c98]"
@@ -209,7 +154,6 @@ export default function LoginForm() {
                     Sign up
                 </Link>
             </p>
-<<<<<<< HEAD
 
             <p className="text-center text-base">
                 <Link
@@ -219,8 +163,6 @@ export default function LoginForm() {
                     Recover Account?
                 </Link>
             </p>
-=======
->>>>>>> 2e5d4f00a20ce2d02a367e5345e7c9cac7566892
         </form>
     );
 }
