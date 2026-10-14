@@ -18,6 +18,17 @@ export class AuthValidator {
         const [local, domain] = parts;
         const labels = domain.split(".");
 
+        const hasCountryLikeLabelBeforeEnd = labels
+            .slice(0, -1)
+            .some((label) => /^[A-Za-z]{2}$/.test(label));
+
+        if (hasCountryLikeLabelBeforeEnd) {
+            return {
+                valid: false,
+                error: "Use only one country Suffix at the end of the email domain.",
+            };
+        }
+
         const validLocal =
             local.length > 0 &&
             local.length <= 64 &&

@@ -138,7 +138,7 @@ export default function AuthorStudio() {
                             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                                 <h2 className="text-lg font-bold">My contributions</h2>
                                 <p className="text-xs text-stone-600">
-                                    {submitted} submitted ·{" "}
+                                    {submitted} pending ·{" "}
                                     {state.contributions.length - submitted} drafts
                                 </p>
                             </div>
@@ -166,7 +166,7 @@ export default function AuthorStudio() {
                                             <span
                                                 className={`rounded-full px-2 py-1 text-xs font-bold ${item.status === "draft" ? "bg-stone-100 text-stone-700" : "bg-amber-100 text-amber-900"}`}
                                             >
-                                                {item.status === "draft" ? "Draft" : "Submitted"}
+                                                {item.status === "draft" ? "Draft" : "Pending"}
                                             </span>
                                             <p className="mt-3 wrap-break-word font-bold">
                                                 {item.question}
