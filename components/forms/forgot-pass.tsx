@@ -56,14 +56,14 @@ export default function ForgotPasswordForm() {
                     />
 
                     <label htmlFor="new-password" className="sr-only">
-                        Lagay mo dito bagong password
+                        Enter New Password
                     </label>
 
                     <input
                         id="new-password"
                         name="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Bagong Password Mo"
+                        placeholder="Enter New Password"
                         autoComplete="new-password"
                         aria-describedby="reset-password-hint"
                         value={password}
@@ -96,14 +96,14 @@ export default function ForgotPasswordForm() {
                     />
 
                     <label htmlFor="confirm-new-password" className="sr-only">
-                        Confirm mo password
+                        Confirm Password
                     </label>
 
                     <input
                         id="confirm-new-password"
                         name="confirmPassword"
                         type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm mo Password"
+                        placeholder="Confirm Password"
                         autoComplete="new-password"
                         value={confirmPassword}
                         onChange={(event) => setConfirmPassword(event.target.value)}

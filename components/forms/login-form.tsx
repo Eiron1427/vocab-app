@@ -65,14 +65,14 @@ export default function LoginForm() {
                         />
 
                         <label htmlFor="login-email" className="sr-only">
-                            Dito ang Email address
+                            Enter Email Address
                         </label>
 
                         <input
                             id="login-email"
                             name="email"
                             type="email"
-                            placeholder="Email address mo dito"
+                            placeholder="Enter Email Address"
                             autoComplete="email"
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
@@ -88,14 +88,14 @@ export default function LoginForm() {
                         />
 
                         <label htmlFor="login-password" className="sr-only">
-                            Ilagay mo dito Password
+                            Enter Password
                         </label>
 
                         <input
                             id="login-password"
                             name="password"
                             type={showPassword ? "text" : "password"}
-                            placeholder="Password mo dito"
+                            placeholder="Enter Password"
                             autoComplete="current-password"
                             aria-describedby="login-password-hint"
                             value={password}

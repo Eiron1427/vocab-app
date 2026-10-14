@@ -94,14 +94,14 @@ export default function RegisterForm() {
                         />
 
                         <label htmlFor="username" className="sr-only">
-                            Username dito mo ilagay
+                            Enter Username
                         </label>
 
                         <input
                             id="username"
                             name="username"
                             type="text"
-                            placeholder="Username mo dito"
+                            placeholder="Enter Username"
                             autoComplete="username"
                             value={username}
                             onChange={(event) => setUsername(event.target.value)}
@@ -119,14 +119,14 @@ export default function RegisterForm() {
                         />
 
                         <label htmlFor="email" className="sr-only">
-                            Dito ang Email address
+                            Enter Email address
                         </label>
 
                         <input
                             id="email"
                             name="email"
                             type="email"
-                            placeholder="Email address mo dito"
+                            placeholder="Enter Email address"
                             autoComplete="email"
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
@@ -143,14 +143,14 @@ export default function RegisterForm() {
                         />
 
                         <label htmlFor="password" className="sr-only">
-                            Ilagay mo dito Password
+                            Enter Password
                         </label>
 
                         <input
                             id="password"
                             name="password"
                             type={showPassword ? "text" : "password"}
-                            placeholder="Password mo dito"
+                            placeholder="Enter Password"
                             autoComplete="new-password"
                             aria-describedby="password-hint"
                             value={password}
@@ -182,14 +182,14 @@ export default function RegisterForm() {
                         />
 
                         <label htmlFor="confirmPassword" className="sr-only">
-                            Confirm mo password
+                            Confirm password
                         </label>
 
                         <input
                             id="confirmPassword"
                             name="confirmPassword"
                             type={showConfirmPassword ? "text" : "password"}
-                            placeholder="Confirm mo password"
+                            placeholder="Confirm password"
                             autoComplete="new-password"
                             value={confirmPassword}
                             onChange={(event) => setConfirmPassword(event.target.value)}
