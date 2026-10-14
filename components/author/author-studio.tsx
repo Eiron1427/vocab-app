@@ -9,6 +9,7 @@ import {
     CATEGORIES,
     type Category,
     type QuestionInput,
+    type Contribution,
 } from "@/types/app-state";
 import {
     panelStyle,
@@ -24,14 +25,43 @@ const empty: QuestionInput = {
 };
 type View = "dashboard" | "edit" | "preview" | "submitted";
 
+const contributionStatus: Record<
+    Contribution["status"],
+    { label: string; className: string; description: string }
+> = {
+    draft: {
+        label: "Draft",
+        className: "bg-stone-100 text-stone-700",
+        description: "Not submitted",
+    },
+    submitted: {
+        label: "Pending",
+        className: "bg-amber-100 text-amber-900",
+        description: "Saved locally; awaiting approval",
+    },
+    approved: {
+        label: "Approved",
+        className: "bg-green-100 text-green-800",
+        description: "Approved contribution",
+    },
+};
+
 export default function AuthorStudio() {
     const { state, ready } = useAppState();
     const [view, setView] = useState<View>("dashboard");
     const [form, setForm] = useState<QuestionInput>(empty);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
-    const submitted = state.contributions.filter(
+    const pendingCount = state.contributions.filter(
         (item) => item.status === "submitted",
+    ).length;
+
+    const approvedCount = state.contributions.filter(
+        (item) => item.status === "approved",
+    ).length;
+
+    const draftCount = state.contributions.filter(
+        (item) => item.status === "draft",
     ).length;
     function go(next: View) {
         setError("");
@@ -138,8 +168,7 @@ export default function AuthorStudio() {
                             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                                 <h2 className="text-lg font-bold">My contributions</h2>
                                 <p className="text-xs text-stone-600">
-                                    {submitted} pending ·{" "}
-                                    {state.contributions.length - submitted} drafts
+                                    {pendingCount} pending · {approvedCount} approved · {draftCount} drafts
                                 </p>
                             </div>
                             {!state.contributions.length ? (
@@ -164,18 +193,16 @@ export default function AuthorStudio() {
                                             className="rounded-2xl border border-stone-200 bg-white p-4"
                                         >
                                             <span
-                                                className={`rounded-full px-2 py-1 text-xs font-bold ${item.status === "draft" ? "bg-stone-100 text-stone-700" : "bg-amber-100 text-amber-900"}`}
+                                                className={`rounded-full px-2 py-1 text-xs font-bold ${contributionStatus[item.status].className
+                                                    }`}
                                             >
-                                                {item.status === "draft" ? "Draft" : "Pending"}
+                                                {contributionStatus[item.status].label}
                                             </span>
                                             <p className="mt-3 wrap-break-word font-bold">
                                                 {item.question}
                                             </p>
                                             <p className="mt-2 text-xs text-stone-600">
-                                                {item.category} ·{" "}
-                                                {item.status === "submitted"
-                                                    ? "Saved locally; not verified"
-                                                    : "Not submitted"}
+                                                {item.category} · {contributionStatus[item.status].description}
                                             </p>
                                             {item.status === "draft" && (
                                                 <button

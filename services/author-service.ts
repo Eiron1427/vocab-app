@@ -3,7 +3,7 @@ import { LocalRepository } from "../repositories/local-repository";
 import type { Contribution, QuestionInput } from "../types/app-state";
 export class AuthorService {
     constructor(private readonly repository: LocalRepository) { }
-    save(input: QuestionInput, status: Contribution["status"]): void {
+    save(input: QuestionInput, status: "draft" | "submitted"): void {
         const model = new QuestionModel(input);
         const error = model.validate();
         if (error) throw new Error(error);
@@ -12,11 +12,11 @@ export class AuthorService {
             const existing = state.contributions.find(
                 (entry) => entry.id === item.id,
             );
-            if (existing?.status === "submitted") return state; // Double submit cannot create duplicates.
+            if (existing?.status === "submitted" || existing?.status === "approved") { return state; } // Double submit cannot create duplicates.
             const duplicate = state.contributions.some(
                 (entry) =>
                     entry.id !== item.id &&
-                    entry.status === "submitted" &&
+                    (entry.status === "submitted" || entry.status === "approved") &&
                     QuestionModel.fingerprint(entry) === QuestionModel.fingerprint(item),
             );
             if (duplicate) {

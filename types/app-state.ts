@@ -17,7 +17,7 @@ export interface QuestionInput {
     answer: string;
 }
 export interface Contribution extends QuestionInput {
-    status: "draft" | "submitted";
+    status: "draft" | "submitted" | "approved";
     createdAt: string;
     updatedAt: string;
 }

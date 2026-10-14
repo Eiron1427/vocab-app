@@ -69,7 +69,7 @@ export class AppStateModel {
                         typeof item.answer === "string" &&
                         item.answer.length <= 100 &&
                         CATEGORIES.some((category) => category === item.category) &&
-                        (item.status === "draft" || item.status === "submitted") &&
+                        (item.status === "draft" || item.status === "submitted" || item.status === "approved") &&
                         typeof item.createdAt === "string" &&
                         Number.isFinite(Date.parse(item.createdAt)) &&
                         typeof item.updatedAt === "string" &&
