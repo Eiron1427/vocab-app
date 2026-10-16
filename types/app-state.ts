@@ -1,3 +1,4 @@
+import type { ShopState } from "./shop";
 export const CATEGORIES = [
     "Food",
     "Animals",
@@ -22,6 +23,7 @@ export interface Contribution extends QuestionInput {
     updatedAt: string;
 }
 export interface AppState {
+    shop: ShopState;
     version: 1;
     avatar: string;
     notifications: boolean;

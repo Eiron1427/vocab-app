@@ -1,3 +1,4 @@
+import { ShopModel } from "./shop";
 import {
     CATEGORIES,
     type Contribution,
@@ -11,6 +12,7 @@ export class AppStateModel {
     static empty(): AppState {
         return {
             version: 1,
+            shop: ShopModel.empty(),
             avatar: "",
             notifications: true,
             volume: 85,
@@ -29,6 +31,7 @@ export class AppStateModel {
             return state;
         }
         if (!object(data) || data.version !== 1) return state;
+        state.shop = ShopModel.parse(data.shop);
         if (
             typeof data.avatar === "string" &&
             data.avatar.length <= 700_000 &&
@@ -69,7 +72,9 @@ export class AppStateModel {
                         typeof item.answer === "string" &&
                         item.answer.length <= 100 &&
                         CATEGORIES.some((category) => category === item.category) &&
-                        (item.status === "draft" || item.status === "submitted" || item.status === "approved") &&
+                        (item.status === "draft" ||
+                            item.status === "submitted" ||
+                            item.status === "approved") &&
                         typeof item.createdAt === "string" &&
                         Number.isFinite(Date.parse(item.createdAt)) &&
                         typeof item.updatedAt === "string" &&

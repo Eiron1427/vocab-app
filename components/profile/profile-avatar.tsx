@@ -1,4 +1,5 @@
 "use client";
+import { useShop } from "@/hooks/use-shop";
 
 import { useRef, useState, type ChangeEvent } from "react";
 import Image from "next/image";
@@ -8,6 +9,7 @@ import { settingsService } from "@/lib/app-services";
 
 export default function ProfileAvatar() {
     const { state, ready } = useAppState();
+    const { avatar, border } = useShop();
     const inputRef = useRef<HTMLInputElement>(null);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
@@ -46,9 +48,7 @@ export default function ProfileAvatar() {
                     }
                 };
 
-                reader.onerror = () => reject(
-                    new Error("Could not read this image.")
-                );
+                reader.onerror = () => reject(new Error("Could not read this image."));
 
                 reader.readAsDataURL(file);
             });
@@ -57,9 +57,8 @@ export default function ProfileAvatar() {
             await new Promise<void>((resolve, reject) => {
                 const preview = new window.Image();
                 preview.onload = () => resolve();
-                preview.onerror = () => reject(
-                    new Error("This image could not be opened. Choose another.")
-                );
+                preview.onerror = () =>
+                    reject(new Error("This image could not be opened. Choose another."));
                 preview.src = image;
             });
 
@@ -67,7 +66,7 @@ export default function ProfileAvatar() {
             setNotice("Avatar updated.");
         } catch (error) {
             setError(
-                error instanceof Error ? error.message : "Could not save the avatar."
+                error instanceof Error ? error.message : "Could not save the avatar.",
             );
         } finally {
             setBusy(false);
@@ -85,35 +84,64 @@ export default function ProfileAvatar() {
                 aria-label="Choose an avatar image"
             />
 
-            <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                disabled={!ready || busy}
-                aria-label={busy ? "Saving avatar" : "Change avatar"}
-                title="Change avatar"
-                className="relative flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-black bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-purple-700 disabled:opacity-50"
-            >
-                {state.avatar ? (
+            <div className="relative flex size-24 items-center justify-center">
+                <button
+                    type="button"
+                    onClick={() => inputRef.current?.click()}
+                    disabled={!ready || busy}
+                    aria-label={busy ? "Saving avatar" : "Change avatar"}
+                    title="Change avatar"
+                    className="relative flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-black bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-purple-700 disabled:opacity-50"
+                >
+                    {avatar?.image ? (
+                        <Image
+                            src={avatar.image}
+                            alt={`${avatar.name} avatar`}
+                            width={64}
+                            height={64}
+                            className="h-full w-full rounded-full object-cover"
+                        />
+                    ) : avatar ? (
+                        <span
+                            role="img"
+                            aria-label={`${avatar.name} avatar`}
+                            className="text-4xl"
+                        >
+                            {avatar.visual}
+                        </span>
+                    ) : state.avatar ? (
+                        <Image
+                            src={state.avatar}
+                            alt="Your avatar"
+                            width={64}
+                            height={64}
+                            unoptimized
+                            className="h-full w-full rounded-full object-cover"
+                        />
+                    ) : (
+                        <User
+                            className="h-10 w-10 fill-black"
+                            strokeWidth={0}
+                            aria-hidden="true"
+                        />
+                    )}
+
+                    <span className="absolute -bottom-1 -right-1 z-10 rounded-full bg-white p-1 text-black">
+                        <RefreshCcw size={14} aria-hidden="true" />
+                    </span>
+                </button>
+                {border?.image && (
                     <Image
-                        src={state.avatar}
-                        alt="Your avatar"
-                        width={64}
-                        height={64}
-                        unoptimized
-                        className="h-full w-full rounded-full object-cover"
-                    />
-                ) : (
-                    <User
-                        className="h-10 w-10 fill-black"
-                        strokeWidth={0}
+                        src={border.image}
+                        alt=""
                         aria-hidden="true"
+                        width={96}
+                        height={96}
+                        unoptimized
+                        className="pointer-events-none absolute inset-0 size-24 object-contain"
                     />
                 )}
-
-                <span className="absolute -bottom-1 -right-1 rounded-full bg-white p-1 text-black">
-                    <RefreshCcw size={14} aria-hidden="true" />
-                </span>
-            </button>
+            </div>
 
             {error && (
                 <p
@@ -130,4 +158,3 @@ export default function ProfileAvatar() {
         </div>
     );
 }
-

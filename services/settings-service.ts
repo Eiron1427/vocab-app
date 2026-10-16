@@ -40,10 +40,8 @@ export class SettingsService {
     setAvatar(avatar: string) {
         if (
             avatar !== "" &&
-            (
-                avatar.length > 700_000 ||
-                !/^data:image\/(png|jpeg|webp);base64,/.test(avatar)
-            )
+            (avatar.length > 700_000 ||
+                !/^data:image\/(png|jpeg|webp);base64,/.test(avatar))
         ) {
             throw new Error("Choose a JPG, PNG, or WebP image under 500 KB.");
         }
@@ -51,7 +49,10 @@ export class SettingsService {
         this.repository.update((state) => ({
             ...state,
             avatar,
+            shop: {
+                ...state.shop,
+                equipped: { ...state.shop.equipped, avatar: null },
+            },
         }));
     }
-
 }
