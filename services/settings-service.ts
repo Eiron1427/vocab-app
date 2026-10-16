@@ -19,9 +19,12 @@ export class SettingsService {
     saveProfile(input: ProfileSettings) {
         const username = input.username.trim();
         const email = input.email.trim();
-        if (username.length < 2 || username.length > 30)
-            throw new Error("Use a display name with 2–30 characters.");
-        // Email is optional for the local demo. Reuse the project's shared validator when supplied.
+        const usernameResult = this.validator.validateUsername(username);
+
+        if (!usernameResult.valid) {
+            throw new Error(usernameResult.error);
+        }
+
         if (email) {
             const result = this.validator.validateEmail(email);
             if (!result.valid) throw new Error(result.error);

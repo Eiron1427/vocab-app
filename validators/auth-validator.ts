@@ -1,6 +1,5 @@
 import type { LoginInput, PasswordInput, RegisterInput, ValidationResult } from "../types/auth";
 
-/** Shared rules; UI wording may differ between forms. Never stores passwords. */
 export class AuthValidator {
     validateEmail(value: string): ValidationResult {
         const email = value.trim();
@@ -49,6 +48,25 @@ export class AuthValidator {
             : invalid;
 
     }
+    validateUsername(value: string): ValidationResult {
+        const username = value.trim();
+
+        if (username.length < 2 || username.length > 30) {
+            return {
+                valid: false,
+                error: "Use a username with 2–30 characters.",
+            };
+        }
+
+        if (username.includes("@")) {
+            return {
+                valid: false,
+                error: "Use a username, not an email address. The @ symbol is not allowed.",
+            };
+        }
+
+        return { valid: true };
+    }
     validatePassword(input: PasswordInput, messages = {
         short: "Password must have at least 8 characters.",
         mismatch: "Passwords do not match.",
@@ -63,10 +81,13 @@ export class AuthValidator {
         return this.validatePassword({ password: input.password, confirmPassword: input.password });
     }
     validateRegistration(input: RegisterInput): ValidationResult {
-        if (!input.username.trim()) return { valid: false, error: "username ang ilagay" };
+        const username = this.validateUsername(input.username);
+        if (!username.valid) return username;
+
         const email = this.validateEmail(input.email);
         if (!email.valid) return email;
-        return this.validatePassword(input, { short: "8 characters ang password.", mismatch: "Ulit, mali password mo" });
+
+        return this.validatePassword(input);
     }
     validateRecoveryCode(code: string): ValidationResult {
         return /^\d{6}$/.test(code) ? { valid: true }
