@@ -12,7 +12,7 @@ export class LocalRepository {
     constructor(
         private readonly storage: () => KeyValueStorage = () => window.localStorage,
     ) { }
-    // Stable primitive snapshot for useSyncExternalStore; never return a new object here.
+
     snapshot(): string | null {
         try {
             const storage = this.storage();
