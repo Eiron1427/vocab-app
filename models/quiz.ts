@@ -2,7 +2,7 @@ import { QUIZZES } from "@/data/quiz";
 import type { QuizState } from "@/types/quiz";
 export class QuizModel {
     static empty(): QuizState {
-        return { progress: {}, sessions: {} };
+        return { progress: {}, sessions: {}, results: {} };
     }
     static total(id: string) {
         return QUIZZES[id]?.length ?? 0;
@@ -29,6 +29,18 @@ export class QuizModel {
                 const progress = data.progress?.[id];
                 if (Number.isInteger(progress) && progress >= 0 && progress <= total)
                     state.progress[id] = progress;
+                const result = data.results?.[id];
+                if (
+                    result &&
+                    Number.isInteger(result.total) &&
+                    result.total === total &&
+                    Number.isInteger(result.score) &&
+                    result.score >= 0 &&
+                    result.score <= total
+                ) {
+                    state.results[id] = { score: result.score, total };
+                    state.progress[id] = total;
+                }
                 const session = data.sessions?.[id];
                 if (
                     session &&
@@ -47,6 +59,11 @@ export class QuizModel {
                         state.progress[id] ?? 0,
                         session.answered,
                     );
+                    // Old saves retained a completed session but had no result field.
+                    // Recover only a real finished score; never invent a missing score.
+                    if (!state.results[id] && session.answered === total) {
+                        state.results[id] = { score: session.score, total };
+                    }
                 }
             }
         } catch {
@@ -73,7 +90,14 @@ export class QuizModel {
             option >= question.options.length
         )
             throw new Error("Choose a valid answer.");
+        const score = session.score + Number(option === question.answer);
+        const total = this.total(id);
         return {
+            ...state,
+            results:
+                index + 1 === total
+                    ? { ...state.results, [id]: { score, total } }
+                    : state.results,
             progress: {
                 ...state.progress,
                 [id]: Math.max(state.progress[id] ?? 0, index + 1),
@@ -82,7 +106,7 @@ export class QuizModel {
                 ...state.sessions,
                 [id]: {
                     answered: index + 1,
-                    score: session.score + Number(option === question.answer),
+                    score,
                 },
             },
         };

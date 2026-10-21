@@ -1,101 +1,138 @@
 "use client";
-
-import { useAppState } from "@/hooks/use-app-state";
+import Link from "next/link";
+import { useProfile } from "@/hooks/use-profile";
 import ProgressBar from "@/components/ui/progress-bar";
-import {
-    BookOpen, ListChecks, Star, ChartNoAxesColumn, Target, Trophy, Check,
-} from "lucide-react";
-import ProfileAvatar from '@/components/profile/profile-avatar'
-
-const stats = [
-    { icon: BookOpen, value: "25", label: "Lessons\nCompleted" },
-    { icon: ListChecks, value: "85%", label: "Average\nScore" },
-    { icon: Star, value: "45", label: "Quiz\nTaken" },
-    { icon: ChartNoAxesColumn, value: "Lv. 4", label: "Progress\nLevel" },
-];
-
-const progress = [
-    { icon: BookOpen, label: "Vocabulary Lesson", pct: 80, right: "20/25" },
-    { icon: ListChecks, label: "Quizzes Completed", pct: 70, right: "42/60" },
-    { icon: Target, label: "Average Score", pct: 85, right: "85%" },
-    { icon: Trophy, label: "Current Streak", pct: 47, right: "7 Days" },
-];
-
-
-
+import ProfileAvatar from "@/components/profile/profile-avatar";
+import { BookOpen, ListChecks, Target, Languages, Layers } from "lucide-react";
+import type { ProfileMetric } from "@/types/profile";
+const icons: Record<ProfileMetric, typeof BookOpen> = {
+    lessons: BookOpen,
+    levels: Layers,
+    quizzes: ListChecks,
+    score: Target,
+    words: Languages,
+};
 export default function ProfileOverview() {
-    const { state } = useAppState();
+    const { profile, ready } = useProfile();
+    if (!ready)
+        return (
+            <p role="status" className="rounded-[26px] bg-white/80 p-5">
+                Loading your progress…
+            </p>
+        );
     return (
-        <section className="rounded-[26px] bg-white/55 p-4 sm:p-5 backdrop-blur-sm">
+        <section className="rounded-[26px] bg-white/55 p-4 text-black backdrop-blur-sm sm:p-5">
             <div className="mt-2 flex items-center gap-4">
                 <ProfileAvatar />
-
                 <div className="min-w-0 flex-1">
-                    <h1 className="wrap-break-word text-3xl font-bold leading-tight text-black sm:text-4xl">
-                        {state.profile.username}
+                    <h1 className="wrap-break-word text-3xl font-bold leading-tight sm:text-4xl">
+                        {profile.displayName}
                     </h1>
-
-                    <div className="mt-3 flex items-center gap-3">
+                    <p className="mt-3 text-xs text-neutral-700">
+                        Available learning content completed
+                    </p>
+                    <div className="mt-1 flex items-center gap-3">
                         <div className="min-w-0 flex-1">
-                            <ProgressBar value={45} label="Level progress" />
+                            <ProgressBar
+                                value={profile.levelProgress}
+                                label="Available learning content completed"
+                            />
                         </div>
-                        <span className="text-xs text-neutral-600">45%</span>
+                        <span className="text-xs text-neutral-700">
+                            {profile.levelProgress}%
+                        </span>
                     </div>
                 </div>
             </div>
-
-            <div className="mt-2 grid grid-cols-4 gap-2.5">
-                {stats.map(({ icon: Icon, value, label }) => (
-                    <div key={label} className="flex flex-col items-center rounded-2xl bg-white px-1 py-2 shadow-md">
-                        <Icon className="h-8 w-8" strokeWidth={1.8} />
-                        <span className="mt-1 text-[15px] font-bold leading-tight">{value}</span>
-                        <span className="whitespace-pre-line text-center text-[10px] font-medium leading-tight">{label}</span>
-                    </div>
-                ))}
-            </div>
-
-            <div className="mt-4 space-y-2.5 rounded-2xl bg-white p-3 shadow-md">
-                {progress.map(({ icon: Icon, label, pct, right }) => (
-                    <div key={label} className="flex items-center gap-2">
-                        <Icon className="h-8 w-8 shrink-0" strokeWidth={1.8} />
-                        <div className="min-w-0 flex-1">
-                            <span className="text-[10px] leading-none">{label}</span>
-                            <ProgressBar value={pct} label={label} />
+            <div className="mt-4 grid grid-cols-2 gap-2.5 min-[380px]:grid-cols-4">
+                {profile.stats.map(({ metric, value, label }) => {
+                    const Icon = icons[metric];
+                    return (
+                        <div
+                            key={metric}
+                            className="flex flex-col items-center rounded-2xl bg-white px-2 py-3 shadow-md"
+                        >
+                            <Icon className="size-8" strokeWidth={1.8} aria-hidden="true" />
+                            <span className="mt-1 text-lg font-bold leading-tight">
+                                {value}
+                            </span>
+                            <span className="mt-1 whitespace-pre-line text-center text-xs leading-tight">
+                                {label}
+                            </span>
                         </div>
-                        <span className="w-12 text-right text-xs">{right}</span>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
-
-            <div className="mt-4 rounded-2xl bg-white p-3 shadow-md">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-base">Recent Activity</h2>
-                    <span className="text-xs text-neutral-600">Sample activity</span>
-                </div>
-
-                <div className="mt-2 flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
-                        <Check className="h-5 w-5 text-white" strokeWidth={3} />
-                    </div>
-                    <div className="flex-1 text-xs leading-tight">
-                        Completed Lesson: Fruit
-                        <br />
-                        July 18, 2025 10:30 AM
-                    </div>
-                    <span className="text-sm">+100 Xp</span>
-                </div>
-
-                <div className="mt-2 flex items-center gap-3">
-                    <Trophy className="h-9 w-9" strokeWidth={2} />
-                    <div className="flex-1 text-xs leading-tight">
-                        Quiz: Food Vocabulary
-                        <br />
-                        July 18, 2025 11:30 AM
-                    </div>
-                    <span className="text-sm">Score: 90%</span>
-                </div>
+            <div className="mt-4 space-y-3 rounded-2xl bg-white p-3 shadow-md">
+                {profile.progress.map(({ metric, label, pct, right }) => {
+                    const Icon = icons[metric];
+                    return (
+                        <div key={metric} className="flex items-center gap-2">
+                            <Icon
+                                className="size-7 shrink-0"
+                                strokeWidth={1.8}
+                                aria-hidden="true"
+                            />
+                            <div className="min-w-0 flex-1">
+                                <p className="mb-1 text-xs">{label}</p>
+                                <ProgressBar value={pct} label={label} />
+                            </div>
+                            <span className="min-w-12 text-right text-xs">{right}</span>
+                        </div>
+                    );
+                })}
+                <p className="text-xs text-neutral-600">
+                    Average uses the latest completed score for each quiz with a saved
+                    result. An unfinished retry does not replace it.
+                </p>
+                {profile.completedQuizzes > profile.scoredQuizzes && (
+                    <p className="text-xs text-amber-800">
+                        Some earlier completions have no saved score. Retake those quizzes
+                        to record a result.
+                    </p>
+                )}
             </div>
-
+            <div className="mt-4 rounded-2xl bg-white p-4 shadow-md">
+                <h2 className="text-lg font-bold">Learning summary</h2>
+                {!profile.summary.length ? (
+                    <div className="mt-3 text-sm text-neutral-700">
+                        <p>
+                            Complete a lesson level or answer a quiz question to see your
+                            progress here.
+                        </p>
+                        <Link
+                            href="/lessons"
+                            className="mt-3 inline-block rounded-xl bg-purple-700 px-4 py-3 font-bold text-white"
+                        >
+                            Start learning
+                        </Link>
+                    </div>
+                ) : (
+                    <ul className="mt-3 space-y-3">
+                        {profile.summary.map((item) => {
+                            const Icon = item.kind === "lesson" ? BookOpen : ListChecks;
+                            return (
+                                <li key={item.id}>
+                                    <Link
+                                        href={item.href}
+                                        className="flex min-h-14 items-center gap-3 rounded-xl bg-orange-50 p-3 focus-visible:outline-2 focus-visible:outline-purple-700"
+                                    >
+                                        <Icon className="size-7 shrink-0" aria-hidden="true" />
+                                        <span className="min-w-0">
+                                            <span className="block text-sm font-bold">
+                                                {item.title}
+                                            </span>
+                                            <span className="block text-xs text-neutral-700">
+                                                {item.detail}
+                                            </span>
+                                        </span>
+                                    </Link>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+            </div>
         </section>
     );
 }
