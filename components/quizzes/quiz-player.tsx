@@ -175,7 +175,7 @@ function QuizSessionView({
 
     return (
         <>
-            <section className="relative flex min-h-[480px] flex-1 flex-col rounded-[26px] bg-white/85 px-5 pb-6 pt-5 backdrop-blur-sm">
+            <section className="relative flex min-h-120flex-1 flex-col rounded-[26px] bg-white/85 px-5 pb-6 pt-5 backdrop-blur-sm">
                 <Link
                     href="/quizzes"
                     aria-label="Back to quizzes"
