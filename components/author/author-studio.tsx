@@ -354,7 +354,7 @@ export default function AuthorStudio() {
                             </article>
                             <p className="my-5 text-sm text-stone-600">
                                 Submitting saves this question in your local contribution list.
-                                An admin can review it in Admin Studio. Publishing to quizzes will be added later.
+                                An admin can review it in Admin Studio. Once approved, it will appear in Community Quizzes.
                             </p>
                             <div className="grid gap-3">
                                 <button
@@ -382,7 +382,7 @@ export default function AuthorStudio() {
                                 Your question was saved on this device.
                             </p>
                             <p className="mt-2 text-sm text-stone-600">
-                                It is pending review in Admin Studio and has not been added to quizzes.
+                                It is pending review in Admin Studio. Once approved, it will appear in Community Quizzes.
                             </p>
                             <button
                                 type="button"

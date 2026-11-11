@@ -33,7 +33,7 @@ export default function AdminOverview() {
     return <section className={panelStyle}>
         <Link href="/settings" className="inline-block py-3 font-bold text-purple-800">← Back to Settings</Link>
         <h1 className="mt-2 text-3xl font-extrabold">Admin Studio</h1>
-        <p className="mt-2 text-sm text-stone-600">Review vocabulary contributions saved on this device. Approval does not yet publish questions to quizzes.</p>
+        <p className="mt-2 text-sm text-stone-600">Review vocabulary contributions saved on this device. Approved questions appear in Community Quizzes.</p>
         {!ready ? <p role="status" className="mt-4">Loading submissions…</p> : <>
             <div aria-live="polite" className="my-5 grid grid-cols-3 gap-2">{Object.entries(counts).map(([label, count]) => <div key={label} className="rounded-xl bg-orange-50 p-3 text-center"><p className="text-2xl font-bold">{count}</p><p className="text-xs capitalize">{label}</p></div>)}</div>
             <div className="mb-4 flex flex-wrap gap-2">{([['submitted', 'Pending'], ['approved', 'Approved'], ['reviewed', 'Last reviews']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)} className={`rounded-xl border px-4 py-3 font-bold ${filter === value ? 'bg-[#ffe183]' : 'bg-white'}`}>{label}</button>)}</div>

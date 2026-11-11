@@ -12,6 +12,16 @@ export default function QuizOverview() {
             <p className="mt-2 text-center text-sm">
                 Finish all questions in a quiz to unlock the next one.
             </p>
+            <Link
+                href="/quizzes/community"
+                className="mt-4 flex min-h-14 items-center justify-between gap-3 rounded-xl bg-purple-100 px-4 py-3 font-bold text-purple-900 focus-visible:outline-2 focus-visible:outline-purple-700"
+            >
+                <span>
+                    Community Quizzes
+                    <span className="block text-xs font-normal">Practice with approved Author Studio questions</span>
+                </span>
+                <span aria-hidden="true">→</span>
+            </Link>
             {!ready ? (
                 <p role="status" className="mt-4">
                     Loading quizzes…
