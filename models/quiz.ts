@@ -1,21 +1,23 @@
 import { QUIZZES } from "@/data/quiz";
+import { lessonsForAgeGroup } from "@/data/lesson";
+import type { AppState } from "@/types/app-state";
+import type { AgeGroup } from "@/types/age-group";
 import type { QuizState } from "@/types/quiz";
 export class QuizModel {
     static empty(): QuizState {
         return { progress: {}, sessions: {}, results: {} };
     }
     static total(id: string) {
-        return QUIZZES[id]?.length ?? 0;
+        return Object.hasOwn(QUIZZES, id) ? QUIZZES[id].length : 0;
     }
-    static unlocked(id: string, state: QuizState): boolean {
-        const ids = Object.keys(QUIZZES).sort((a, b) => Number(a) - Number(b));
-        const index = ids.indexOf(id);
-        return (
-            index >= 0 &&
-            ids
-                .slice(0, index)
-                .every((key) => (state.progress[key] ?? 0) >= this.total(key))
-        );
+    static lessons(ageGroup?: AgeGroup) {
+        return lessonsForAgeGroup(ageGroup).filter((lesson) => this.total(String(lesson.id)) > 0);
+    }
+    static unlocked(id: string, app: Pick<AppState, "profile" | "completedLevels">): boolean {
+        const lesson = this.lessons(app.profile.ageGroup).find((item) => String(item.id) === id);
+        return !!lesson && lesson.levels
+            .filter((level) => level.words.length > 0)
+            .every((level) => app.completedLevels.includes(`${id}:${level.id}`));
     }
     static parse(raw: string | null): QuizState {
         const state = this.empty();
@@ -72,12 +74,13 @@ export class QuizModel {
     }
     static answer(
         state: QuizState,
+        app: Pick<AppState, "profile" | "completedLevels">,
         id: string,
         index: number,
         option: number,
     ): QuizState {
-        if (!this.unlocked(id, state))
-            throw new Error("Complete the previous quiz first.");
+        if (!this.unlocked(id, app))
+            throw new Error("Complete the matching lesson in your age track first.");
         const session = state.sessions[id] ?? { answered: 0, score: 0 };
         if (session.answered !== index)
             throw new Error("This quiz changed in another tab. Reload to continue.");

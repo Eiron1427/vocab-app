@@ -1,28 +1,44 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import Link from "next/link";
 import { useAppState } from '@/hooks/use-app-state';
 import { settingsService, speechService } from '@/lib/app-services';
 import {
     BookOpen, Lock, ArrowLeft, Sparkles,
     Volume2, ArrowRight, PartyPopper,
 } from 'lucide-react';
-import { LESSON_DATA } from "@/data/lesson";
+import { lessonsForAgeGroup } from "@/data/lesson";
 import { LessonService } from '@/services/lesson-service';
 import type { Lesson } from '@/types/lesson'
+import type { AppState } from "@/types/app-state";
+import type { AgeGroup } from "@/types/age-group";
 
 
-const lessonService = new LessonService(LESSON_DATA);
 export default function LessonOverview() {
+    const { state, ready } = useAppState();
+    if (!ready) return <p role="status" className="rounded-2xl bg-white/90 p-5">Loading lesson progress…</p>;
+    const ageGroup = state.profile.ageGroup;
+    if (!ageGroup) return (
+        <section className="rounded-2xl bg-white/90 p-5 text-stone-900">
+            <h1 className="text-2xl font-bold">Choose a lesson track</h1>
+            <p className="mt-2">Save your learner age group under Settings → Account to see the lessons for your range.</p>
+            <Link href="/settings" className="mt-4 inline-block font-bold text-purple-800 underline">Open Settings</Link>
+        </section>
+    );
+    return <LessonTrack key={ageGroup} state={state} ageGroup={ageGroup} />;
+}
+
+function LessonTrack({ state, ageGroup }: { state: AppState; ageGroup: AgeGroup }) {
+    const lessonService = useMemo(() => new LessonService(lessonsForAgeGroup(ageGroup)), [ageGroup]);
     const [currentView, setCurrentView] = useState<
         "lessons" | "levels" | "detail" | "completion"
     >("lessons");
 
-    const [activeLessonId, setActiveLessonId] = useState(1);
+    const [activeLessonId, setActiveLessonId] = useState(() => lessonService.getLessons()[0].id);
     const [activeLevelId, setActiveLevelId] = useState(1);
     const [vocabIndex, setVocabIndex] = useState(0);
 
-    const { state, ready } = useAppState();
     const completedLevels = state.completedLevels;
     useEffect(() => () => speechService.stop(), []);
 
@@ -123,13 +139,7 @@ export default function LessonOverview() {
         }
 
         try {
-            settingsService.setCompletedLevels(
-                lessonService.completeLevel(
-                    activeLessonId,
-                    activeLevelId,
-                    completedLevels,
-                ),
-            );
+            settingsService.completeLessonLevel(activeLessonId, activeLevelId);
         } catch (error) {
             showNotice((error as Error).message);
             return;
@@ -164,8 +174,6 @@ export default function LessonOverview() {
         }
     }
 
-    if (!ready) return <p role="status" className="rounded-2xl bg-white/90 p-5">Loading lesson progress…</p>;
-
     return (
         <div className="relative flex w-full flex-col items-center pb-6 font-sans">
 
@@ -195,6 +203,7 @@ export default function LessonOverview() {
 
                         <div className="text-center mb-5">
                             <h1 className="text-3xl font-black text-stone-900 tracking-tight">Select Lesson</h1>
+                            <p className="mt-2 font-bold text-purple-800">Ages {ageGroup}</p>
                             <p className="text-stone-600 text-xs font-medium mt-1">Please complete previous lesson to unlock next Lesson</p>
                         </div>
 
@@ -302,7 +311,7 @@ export default function LessonOverview() {
 
                         {/* Header Titles */}
                         <div className="mb-3">
-                            <h1 className="text-2xl font-black text-stone-900">Lesson {activeLessonId}. Word {vocabIndex + 1} of {vocabItems.length}</h1>
+                            <h1 className="text-2xl font-black text-stone-900">Word {vocabIndex + 1} of {vocabItems.length}</h1>
 
                         </div>
 

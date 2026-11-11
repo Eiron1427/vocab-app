@@ -5,6 +5,7 @@ import { ArrowLeft, Bell, Volume2, UserRound, Info, PenLine, Check, } from "luci
 import { useAppState } from "@/hooks/use-app-state";
 import { settingsService, speechService } from "@/lib/app-services";
 import type { ProfileSettings } from "@/types/app-state";
+import AgeGroupSelect from "@/components/forms/age-group-select";
 import { panelStyle, fieldStyle, primaryStyle, secondaryStyle } from "@/components/ui/app-styles";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
@@ -26,13 +27,15 @@ function AccountForm({
 }) {
     const [username, setUsername] = useState(profile.username);
     const [email, setEmail] = useState(profile.email);
+    const [ageGroup, setAgeGroup] = useState(profile.ageGroup);
 
     function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        onSave({ username, email });
+        onSave({ username, email, ageGroup });
     }
     return (
         <form onSubmit={submit} className="space-y-4">
+            <AgeGroupSelect id="settings-age-group" value={ageGroup} onChange={setAgeGroup} className={fieldStyle} />
             <div>
                 <label htmlFor="settings-name" className="font-semibold">
                     Display name
@@ -309,7 +312,7 @@ export default function SettingsOverview() {
                     {section === "account" && (
                         <>
                             <AccountForm
-                                key={`${state.profile.username}|${state.profile.email}`}
+                                key={JSON.stringify(state.profile)}
                                 profile={state.profile}
                                 onSave={(profile) =>
                                     save(

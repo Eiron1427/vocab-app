@@ -1,5 +1,6 @@
 import { AdminModel } from "./admin";
 import { ShopModel } from "./shop";
+import { isAgeGroup } from "../types/age-group";
 import {
     CATEGORIES,
     type Contribution,
@@ -51,6 +52,8 @@ export class AppStateModel {
                 state.profile.username = data.profile.username.trim().slice(0, 30);
             if (typeof data.profile.email === "string")
                 state.profile.email = data.profile.email.slice(0, 254);
+            if (isAgeGroup(data.profile.ageGroup))
+                state.profile.ageGroup = data.profile.ageGroup;
         }
         if (Array.isArray(data.completedLevels))
             state.completedLevels = [

@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { QUIZZES } from "@/data/quiz";
 import { QuizModel } from "@/models/quiz";
 import { useQuiz } from "@/hooks/use-quiz";
+import { useAppState } from "@/hooks/use-app-state";
 import { quizService } from "@/lib/quiz-services";
 import type { QuizSession } from "@/types/quiz";
 const LETTERS = ["A", "B", "C", "D"];
@@ -13,22 +14,30 @@ export default function QuizPlayer() {
     const searchParams = useSearchParams();
     const id = searchParams.get("lesson") ?? "";
     const { state, ready } = useQuiz();
-    if (!ready)
+    const { state: app, ready: appReady } = useAppState();
+    const ageGroup = app.profile.ageGroup;
+    const inTrack = QuizModel.lessons(ageGroup).some((lesson) => String(lesson.id) === id);
+    if (!ready || !appReady)
         return (
             <p role="status" className="rounded-2xl bg-white/90 p-6">
                 Loading quiz…
             </p>
         );
-    if (!QuizModel.total(id) || !QuizModel.unlocked(id, state))
+    if (!QuizModel.unlocked(id, app))
         return (
             <section className="rounded-2xl bg-white/90 p-6 text-center">
                 <h1 className="text-xl font-bold">
-                    {QuizModel.total(id)
-                        ? "Complete the previous quiz first"
-                        : "Quiz not available yet"}
+                    {!ageGroup
+                        ? "Choose a learner age group in Settings"
+                        : inTrack
+                            ? "Complete the matching lesson first"
+                            : "This quiz is not available in your age track"}
                 </h1>
                 <Link className="mt-4 block font-bold text-purple-800" href="/quizzes">
                     Back to quizzes
+                </Link>
+                <Link className="mt-3 block font-bold text-purple-800" href={ageGroup ? "/lessons" : "/settings"}>
+                    {ageGroup ? "Open Lessons" : "Open Settings"}
                 </Link>
             </section>
         );
@@ -172,7 +181,7 @@ function QuizSessionView({
 
     return (
         <>
-            <section className="relative flex min-h-120flex-1 flex-col rounded-[26px] bg-white/85 px-5 pb-6 pt-5 backdrop-blur-sm">
+            <section className="relative flex min-h-120 flex-1 flex-col rounded-[26px] bg-white/85 px-5 pb-6 pt-5 backdrop-blur-sm">
                 <Link
                     href="/quizzes"
                     aria-label="Back to quizzes"

@@ -1,8 +1,9 @@
 import type { ProfileData, ProfileSummaryItem } from "@/types/profile";
 import type { AppState } from "@/types/app-state";
 import type { QuizState } from "@/types/quiz";
-import { LESSON_DATA } from "@/data/lesson";
+import { lessonsForAgeGroup } from "@/data/lesson";
 import { QUIZZES, QUIZ_TITLES } from "@/data/quiz";
+import { QuizModel } from "@/models/quiz";
 import { clampPercentage } from "@/lib/util";
 const percent = (part: number, total: number) =>
   total > 0 ? Math.round((part / total) * 100) : 0;
@@ -28,7 +29,7 @@ export class LearnerProfile {
       completedLessons = 0;
     const words = new Set<string>();
     const summary: ProfileSummaryItem[] = [];
-    for (const lesson of LESSON_DATA) {
+    for (const lesson of lessonsForAgeGroup(app.profile.ageGroup)) {
       const available = lesson.levels.filter((level) => level.words.length > 0);
       const done = available.filter((level) =>
         completed.has(`${lesson.id}:${level.id}`),
@@ -49,7 +50,7 @@ export class LearnerProfile {
           href: "/lessons",
         });
     }
-    const quizIds = Object.keys(QUIZZES).filter((id) => QUIZZES[id].length > 0);
+    const quizIds = QuizModel.lessons(app.profile.ageGroup).map((lesson) => String(lesson.id));
     const completedIds = quizIds.filter(
       (id) => (quiz.progress[id] ?? 0) >= QUIZZES[id].length,
     );
@@ -71,7 +72,7 @@ export class LearnerProfile {
       summary.push({
         id: `quiz-${id}`,
         kind: "quiz",
-        title: `Quiz: ${QUIZ_TITLES[id] ?? `Lesson ${id}`}`,
+        title: `Quiz: ${QUIZ_TITLES[id]}`,
         detail: result
           ? `Latest completed score: ${result.score}/${result.total} (${percent(result.score, result.total)}%)`
           : answered >= QUIZZES[id].length

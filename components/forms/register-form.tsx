@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation"
 import { AuthValidator } from '@/validators/auth-validator';
 import PasswordStrength from './password-strength'
 import { settingsService } from '@/lib/app-services'
+import AgeGroupSelect from "./age-group-select";
+import type { AgeGroup } from "@/types/age-group";
 
 
 
@@ -15,6 +17,7 @@ const authValidator = new AuthValidator();
 
 export default function RegisterForm() {
     const [username, setUsername] = useState("");
+    const [ageGroup, setAgeGroup] = useState<AgeGroup>();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -44,6 +47,11 @@ export default function RegisterForm() {
 
         setError("");
 
+        if (!ageGroup) {
+            setError("Choose a learner age group.");
+            return;
+        }
+
         const result = authValidator.validateRegistration({
             username: username.trim(),
             email: email.trim(),
@@ -60,6 +68,7 @@ export default function RegisterForm() {
             settingsService.saveProfile({
                 username: username.trim(),
                 email: email.trim(),
+                ageGroup,
             });
 
             setPassword("");
@@ -86,6 +95,8 @@ export default function RegisterForm() {
 
             <fieldset disabled={success} className="m-0 min-w-0 border-0 p-0">
                 <div className="grid gap-6">
+                    <AgeGroupSelect id="register-age-group" value={ageGroup} onChange={setAgeGroup}
+                        className={`${fieldStyle} w-full`} />
 
                     <div className={fieldStyle}>
                         <UserRound

@@ -1,3 +1,5 @@
+import type { AgeGroup } from "./age-group";
+
 export interface Lesson {
     id: number;
     title: string;
@@ -20,6 +22,7 @@ export interface LevelDefinition {
 
 export interface LessonDefinition {
     id: number;
+    ageGroup: AgeGroup;
     title: string
     levels: readonly LevelDefinition[]
 }

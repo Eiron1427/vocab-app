@@ -1,7 +1,8 @@
 import { QuizModel } from "@/models/quiz";
 import type { QuizState } from "@/types/quiz";
 export class QuizRepository {
-    static readonly key = "vocab-app.quiz.v1";
+    // The old question bank has different questions and answer order.
+    static readonly key = "vocab-app.quiz.v2";
     static readonly event = "vocab-app:quiz-change";
     snapshot(): string | null {
         try {

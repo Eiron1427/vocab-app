@@ -1,4 +1,5 @@
 import type { ShopState } from "./shop";
+import type { AgeGroup } from "./age-group";
 export const CATEGORIES = [
     "Food",
     "Animals",
@@ -10,6 +11,7 @@ export type Category = (typeof CATEGORIES)[number];
 export interface ProfileSettings {
     username: string;
     email: string;
+    ageGroup?: AgeGroup;
 }
 export interface QuestionInput {
     id: string;

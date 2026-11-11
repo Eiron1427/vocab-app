@@ -1,6 +1,9 @@
 import { LocalRepository } from "../repositories/local-repository";
 import { AuthValidator } from "../validators/auth-validator";
 import type { ProfileSettings } from "../types/app-state";
+import { isAgeGroup } from "../types/age-group";
+import { lessonsForAgeGroup } from "../data/lesson";
+import { LessonService } from "./lesson-service";
 export class SettingsService {
     constructor(
         private readonly repository: LocalRepository,
@@ -17,6 +20,8 @@ export class SettingsService {
         }));
     }
     saveProfile(input: ProfileSettings) {
+        if (input.ageGroup !== undefined && !isAgeGroup(input.ageGroup))
+            throw new Error("Choose a valid learner age group.");
         const username = input.username.trim();
         const email = input.email.trim();
         const usernameResult = this.validator.validateUsername(username);
@@ -31,14 +36,19 @@ export class SettingsService {
         }
         this.repository.update((state) => ({
             ...state,
-            profile: { username, email },
+            profile: { ...state.profile, username, email, ageGroup: input.ageGroup ?? state.profile.ageGroup },
         }));
     }
-    setCompletedLevels(levels: string[]) {
-        this.repository.update((state) => ({
-            ...state,
-            completedLevels: [...new Set(levels)],
-        }));
+    completeLessonLevel(lessonId: number, levelId: number) {
+        this.repository.update((state) => {
+            const lessons = new LessonService(lessonsForAgeGroup(state.profile.ageGroup));
+            if (!lessons.canOpenLevel(lessonId, levelId, state.completedLevels)) {
+                const error = new Error("This level is unavailable for your current lesson track.");
+                error.name = "ValidationError";
+                throw error;
+            }
+            return { ...state, completedLevels: lessons.completeLevel(lessonId, levelId, state.completedLevels) };
+        });
     }
     setAvatar(avatar: string) {
         if (
