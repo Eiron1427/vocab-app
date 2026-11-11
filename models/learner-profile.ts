@@ -35,7 +35,6 @@ export class LearnerProfile {
       );
       availableLevels += available.length;
       completedLevels += done.length;
-      // Match the lesson screen: every defined level must be completed.
       if (lesson.levels.length > 0 && done.length === lesson.levels.length)
         completedLessons++;
       for (const level of done)
@@ -59,11 +58,11 @@ export class LearnerProfile {
     );
     const average = results.length
       ? Math.round(
-          results.reduce(
-            (sum, result) => sum + (result.score / result.total) * 100,
-            0,
-          ) / results.length,
-        )
+        results.reduce(
+          (sum, result) => sum + (result.score / result.total) * 100,
+          0,
+        ) / results.length,
+      )
       : null;
     for (const id of quizIds) {
       const answered = quiz.progress[id] ?? 0;

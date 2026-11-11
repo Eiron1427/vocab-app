@@ -1,6 +1,6 @@
 import type { ShopItem } from "../types/shop";
 export const STARTING_POINTS = 500;
-// Supplied Shop 2.0 artwork. Robot retains a placeholder until its image is provided.
+
 export const SHOP_ITEMS: readonly ShopItem[] = [
     {
         id: "av-1",

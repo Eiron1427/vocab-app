@@ -8,7 +8,6 @@ export class ShopService {
         return SHOP_ITEMS.filter((item) => item.category === category);
     }
     buy(id: string): void {
-        // Read the current balance and save balance + ownership in the same update.
         this.repository.update((state) => ({
             ...state,
             shop: ShopModel.purchase(state.shop, id),

@@ -204,6 +204,7 @@ export default function AuthorStudio() {
                                             <p className="mt-2 text-xs text-stone-600">
                                                 {item.category} · {contributionStatus[item.status].description}
                                             </p>
+                                            {item.review && <p className="mt-3 whitespace-pre-wrap wrap-break-word rounded-xl bg-orange-50 p-3 text-sm"><strong>{item.review.decision === "returned" ? "Changes requested: " : "Review feedback: "}</strong>{item.review.note || "Approved without additional comments."}</p>}
                                             {item.status === "draft" && (
                                                 <button
                                                     type="button"
@@ -353,7 +354,7 @@ export default function AuthorStudio() {
                             </article>
                             <p className="my-5 text-sm text-stone-600">
                                 Submitting saves this question in your local contribution list.
-                                Verification and publishing will be added later.
+                                An admin can review it in Admin Studio. Publishing to quizzes will be added later.
                             </p>
                             <div className="grid gap-3">
                                 <button
@@ -381,7 +382,7 @@ export default function AuthorStudio() {
                                 Your question was saved on this device.
                             </p>
                             <p className="mt-2 text-sm text-stone-600">
-                                It has not been sent for verification or added to quizzes.
+                                It is pending review in Admin Studio and has not been added to quizzes.
                             </p>
                             <button
                                 type="button"

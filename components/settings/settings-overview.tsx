@@ -204,6 +204,7 @@ export default function SettingsOverview() {
                 <p className="text-xs font-bold uppercase tracking-widest text-purple-700">
                     Make it yours
                 </p>
+                <Link href="/admin" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-purple-100 px-4 py-2 font-bold text-purple-900">Open Admin Studio</Link>
                 <h1 id="settings-heading" className="mt-1 text-3xl font-extrabold">
                     Settings
                 </h1>

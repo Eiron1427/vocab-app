@@ -53,7 +53,6 @@ export default function ProfileAvatar() {
                 reader.readAsDataURL(file);
             });
 
-            // Check that the selected file actually contains a readable image.
             await new Promise<void>((resolve, reject) => {
                 const preview = new window.Image();
                 preview.onload = () => resolve();

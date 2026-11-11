@@ -75,7 +75,6 @@ function QuizSessionView({
     const questions = QUIZZES[id];
     const total = questions ? questions.length : 0;
 
-    // ---------- Result screen (after the last question) ----------
     if (finished) {
         return (
             <section className="rounded-[26px] bg-white/90 p-6 text-center text-black">
@@ -127,7 +126,6 @@ function QuizSessionView({
         );
     }
 
-    // ---------- Question screen ----------
     const q = questions[index];
     const isLast = index === total - 1;
 
@@ -149,7 +147,6 @@ function QuizSessionView({
         const newScore = selected === q.answer ? score + 1 : score;
         setSubmitted(true);
         setScore(newScore);
-        // Save right away, so leaving now (back arrow, browser back, reload) keeps this answer.
     }
 
     function handleNext() {

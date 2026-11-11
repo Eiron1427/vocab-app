@@ -16,6 +16,7 @@ function subscribe(callback: () => void) {
     window.removeEventListener(LocalRepository.event, callback);
   };
 }
+
 export function useAppState() {
   const raw = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
   const ready = useSyncExternalStore(noopSubscribe, clientReady, serverReady);

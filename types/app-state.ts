@@ -18,6 +18,7 @@ export interface QuestionInput {
     answer: string;
 }
 export interface Contribution extends QuestionInput {
+    review?: import("./admin").Review;
     status: "draft" | "submitted" | "approved";
     createdAt: string;
     updatedAt: string;

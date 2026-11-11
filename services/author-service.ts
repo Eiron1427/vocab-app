@@ -12,7 +12,7 @@ export class AuthorService {
             const existing = state.contributions.find(
                 (entry) => entry.id === item.id,
             );
-            if (existing?.status === "submitted" || existing?.status === "approved") { return state; } // Double submit cannot create duplicates.
+            if (existing?.status === "submitted" || existing?.status === "approved") { return state; }
             const duplicate = state.contributions.some(
                 (entry) =>
                     entry.id !== item.id &&

@@ -59,8 +59,7 @@ export class QuizModel {
                         state.progress[id] ?? 0,
                         session.answered,
                     );
-                    // Old saves retained a completed session but had no result field.
-                    // Recover only a real finished score; never invent a missing score.
+
                     if (!state.results[id] && session.answered === total) {
                         state.results[id] = { score: session.score, total };
                     }

@@ -14,9 +14,7 @@ export class ShopModel {
     }
     static parse(raw: unknown): ShopState {
         const result = this.empty();
-        // Existing app saves have no shop field; give the initial allowance once.
         if (raw === undefined) return result;
-        // Corrupt existing balances recover to zero, not a renewed allowance.
         result.points = 0;
         if (!raw || typeof raw !== "object") return result;
         const value = raw as Record<string, unknown>;

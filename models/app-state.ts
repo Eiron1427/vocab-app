@@ -1,3 +1,4 @@
+import { AdminModel } from "./admin";
 import { ShopModel } from "./shop";
 import {
     CATEGORIES,
@@ -7,7 +8,6 @@ import {
 const object = (value: unknown): value is Record<string, unknown> =>
     typeof value === "object" && value !== null;
 
-/** Treat browser storage as untrusted input and recover useful valid fields. */
 export class AppStateModel {
     static empty(): AppState {
         return {
@@ -90,6 +90,7 @@ export class AppStateModel {
                     status: item.status,
                     createdAt: item.createdAt,
                     updatedAt: item.updatedAt,
+                    review: AdminModel.parseReview(item.review),
                 }));
         }
         return state;
